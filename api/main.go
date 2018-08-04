@@ -23,7 +23,7 @@ func main() {
 		db: db,
 	}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/polls/", withCORS(withAPIKey(s.handlePolls)))
+	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handlemessages)))
 	log.Println("Starting web server on", *addr)
 	http.ListenAndServe(":8080", mux)
 	log.Println("Stopping...")
