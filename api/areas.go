@@ -25,8 +25,8 @@ const (
 )
 
 const (
-	RadiusMinimum float32 = 40  // Radius Minimum meters
-	RadiusMaximum float32 = 500 // Radius Maximum
+	RadiusMinimum float32 = 10    // Radius Minimum meters
+	RadiusMaximum float32 = 10000 // Radius Maximum
 )
 
 const (
