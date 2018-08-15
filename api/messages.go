@@ -15,8 +15,11 @@ const (
 const (
 	ReasonSuccess       string = "Success"
 	ReasonFailureParam  string = "Wrong parameter"
+	ReasonMissingParam  string = "Missing parameter"
 	ReasonFailureAPIKey string = "Wrong APIKey"
 	ReasonFailueGeneral string = "Failure in general"
+	ReasonDuplicate     string = "Area Name duplicate"
+	ReasonInsertFailure string = "Insert failed"
 )
 
 type Message struct {
