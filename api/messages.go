@@ -33,12 +33,6 @@ type Message struct {
 	APIKey      string        `json:"apikey"`
 }
 
-type Response struct {
-	Code   int         `json:"code"`
-	Reason string      `json:"reasone"`
-	Data   *[]*Message `json:"data"`
-}
-
 func (s *Server) handlemessages(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -121,8 +115,14 @@ func (s *Server) handlemessagesDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
+
 func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, reason string, msgs *[]*Message) {
-	result := &Response{
+	type response struct {
+		Code   int         `json:"code"`
+		Reason string      `json:"reasone"`
+		Data   *[]*Message `json:"data"`
+	}
+	result := &response{
 		Code:   code,
 		Reason: reason,
 		Data:   msgs}

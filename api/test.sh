@@ -9,10 +9,12 @@ __version__=0.1
 #set -x                     #print every excution log
 set -e                     #exit when error hanppens
 
-IP=35.187.154.122
+#IP=35.187.154.122
+IP=localhost
 
-curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","timestamp":123,"userdefaddr":"test","expirytime":123,"latitude":123,"longitude":123,"altitude":123}' -X POST http://$IP:8080/messages/?key=abc123
+#curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","timestamp":123,"userdefaddr":"test","expirytime":123,"latitude":123,"longitude":123,"altitude":123}' -X POST http://$IP:8080/messages/?key=abc123
 ###curl --data '{"title":"test","options":["one","two","three"]}' -X POST http://$IP:8080/polls/?key=abc123
-curl -X GET http://$IP:8080/polls/?key=abc123
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
-curl -X GET http://$IP:8080/messages/?key=abc123
+#curl -X GET http://$IP:8080/messages/?key=abc123
+curl --data '{"name":"雪窦山 徐凫岩瀑布","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
+curl -X GET http://$IP:8080/areas/?key=abc123

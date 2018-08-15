@@ -7,12 +7,23 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type area struct {
-	ID      bson.ObjectId  `bson:"_id" json:"id"`
-	Title   string         `json:"title" bson:"title"`
-	Options []string       `json:"options"`
-	Results map[string]int `json:"results,omitempty"`
-	APIKey  string         `json:"apikey"`
+const (
+	CategorySystem int = 0 //defined by system
+	CategoryUser   int = 1 //defined by user
+)
+
+type Area struct {
+	ID        bson.ObjectId `bson:"_id" json:"id"`
+	Name      string        `json:"name" bson:"name"`
+	Address1  string        `json:"address1"`
+	Address2  string        `json:"address2"`
+	Category  int           `json:"category"`
+	Type      int           `json:"type"`
+	Latitude  float32       `json:"latitude"`
+	Longitude float32       `json:"longitude"`
+	Altitude  float32       `json:"altitude"`
+	Radius    float32       `json:"radius"` //meter
+	APIKey    string        `json:"apikey"`
 }
 
 func (s *Server) handleareas(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +49,7 @@ func (s *Server) handleareas(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
-	c := session.DB("ballots").C("areas")
+	c := session.DB("iamhere").C("areas")
 	var q *mgo.Query
 	p := NewPath(r.URL.Path)
 	if p.HasID() {
@@ -48,40 +59,41 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 		// get all areas
 		q = c.Find(nil)
 	}
-	var result []*area
+	var result []*Area
 	if err := q.All(&result); err != nil {
 		respondErr(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	respond(w, r, http.StatusOK, &result)
+	responseHandleAreas(w, r, RspOK, ReasonSuccess, &result)
 }
 
 func (s *Server) handleareasPost(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
-	c := session.DB("ballots").C("areas")
-	var p area
+	c := session.DB("iamhere").C("areas")
+	var p Area
 	if err := decodeBody(r, &p); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "failed to read area from request", err)
 		return
 	}
 	apikey, ok := APIKey(r.Context())
-	if ok {
-		p.APIKey = apikey
+	if !ok {
+		responseHandleAreas(w, r, RspFailed, ReasonFailureAPIKey, nil)
 	}
+	p.APIKey = apikey
 	p.ID = bson.NewObjectId()
 	if err := c.Insert(p); err != nil {
 		respondErr(w, r, http.StatusInternalServerError, "failed to insert area", err)
 		return
 	}
 	w.Header().Set("Location", "areas/"+p.ID.Hex())
-	respond(w, r, http.StatusCreated, nil)
+	responseHandleAreas(w, r, RspOK, ReasonSuccess, nil)
 }
 
 func (s *Server) handleareasDelete(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
-	c := session.DB("ballots").C("areas")
+	c := session.DB("iamhere").C("areas")
 	p := NewPath(r.URL.Path)
 	if !p.HasID() {
 		respondErr(w, r, http.StatusMethodNotAllowed, "Cannot delete all areas.")
@@ -91,5 +103,19 @@ func (s *Server) handleareasDelete(w http.ResponseWriter, r *http.Request) {
 		respondErr(w, r, http.StatusInternalServerError, "failed to delete area", err)
 		return
 	}
-	respond(w, r, http.StatusOK, nil) // ok
+	responseHandleAreas(w, r, RspOK, ReasonSuccess, nil)
+}
+
+func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reason string, areas *[]*Area) {
+
+	type response struct {
+		Code   int      `json:"code"`
+		Reason string   `json:"reasone"`
+		Data   *[]*Area `json:"data"`
+	}
+	result := &response{
+		Code:   code,
+		Reason: reason,
+		Data:   areas}
+	respond(w, r, http.StatusOK, &result)
 }
