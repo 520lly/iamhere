@@ -4,6 +4,7 @@ import (
 	//"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -87,6 +88,7 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 	p := NewPath(r.URL.Path)
 	if p.HasID() {
 		// get specific area
+		log.Println("ID ", p.HasID())
 		q = c.FindId(bson.ObjectIdHex(p.ID))
 	} else {
 		// get all areas
@@ -97,6 +99,88 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 		respondErr(w, r, http.StatusInternalServerError, err)
 		return
 	}
+	areaType := r.URL.Query().Get("type")
+	if len(areaType) != 0 {
+		t, err := strconv.Atoi(areaType)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		log.Println("area Type is ", t)
+		if !checkInRange(t, TypeMinimum, TypeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "type is out of range", nil)
+			return
+		}
+		for i, area := range areas {
+			if area.Type != t {
+				areas = append(areas[:i], areas[i+1:]...)
+			}
+		}
+	}
+	areaCategory := r.URL.Query().Get("category")
+	if len(areaCategory) != 0 {
+		ac, err := strconv.Atoi(areaCategory)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		log.Println("area category is ", ac)
+		if !checkInRange(ac, CategoryMinimum, CategoryMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "category is out of range", nil)
+			return
+		}
+		for i, area := range areas {
+			if area.Category != ac {
+				areas = append(areas[:i], areas[i+1:]...)
+			}
+		}
+	}
+	areaLat := r.URL.Query().Get("latitude")
+	areaLon := r.URL.Query().Get("longitude")
+	areaAlt := r.URL.Query().Get("altitude")
+	areaRad := r.URL.Query().Get("radius")
+	if len(areaLat) != 0 || len(areaLon) != 0 || len(areaAlt) != 0 || len(areaRad) != 0 {
+		if !(len(areaLat) != 0 && len(areaLon) != 0 && len(areaAlt) != 0 && len(areaRad) != 0) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
+			return
+		}
+		alat, err := strconv.ParseFloat(areaLat, 32)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		alat32 := float32(alat)
+		alon, err := strconv.ParseFloat(areaLon, 32)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		alon32 := float32(alon)
+		aalt, err := strconv.ParseFloat(areaAlt, 32)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		aalt32 := float32(aalt)
+		arad, err := strconv.ParseFloat(areaRad, 32)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		arad32 := float32(arad)
+
+		log.Println("area latitude: ", alat32, "longitude: ", alon32, "altitude: ", aalt32, "radius: ", arad32)
+		if !checkInRangeFloat32(alat32, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		for i, area := range areas {
+			if area.Latitude != alat32 {
+				areas = append(areas[:i], areas[i+1:]...)
+			}
+		}
+	}
+	log.Println("areas size", len(areas))
 	responseHandleAreas(w, r, RspOK, ReasonSuccess, &areas)
 }
 
@@ -188,4 +272,12 @@ func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reaso
 		Reason: reason,
 		Data:   areas}
 	respond(w, r, http.StatusOK, &result)
+}
+
+func checkInRange(num int, bottom int, top int) (ret bool) {
+	return num > bottom && num < top
+}
+
+func checkInRangeFloat32(num float32, bottom float32, top float32) (ret bool) {
+	return num > bottom && num < top
 }
