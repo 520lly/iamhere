@@ -124,11 +124,13 @@ func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, rea
 		Code   int         `json:"code"`
 		Reason string      `json:"reasone"`
 		Data   *[]*Message `json:"data"`
+		Count  int         `json:"count"`
 	}
 	result := &response{
 		Code:   code,
 		Reason: reason,
-		Data:   msgs}
+		Data:   msgs,
+		Count:  len(*msgs)}
 	//res, err := json.Marshal(result)
 	//if err != nil {
 	//    log.Fatalf("JSON marshaling failed: %s", err)

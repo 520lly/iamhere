@@ -27,7 +27,7 @@ func main() {
 	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handlemessages)))
 	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleareas)))
 	log.Println("Starting web server on", *addr)
-	go http.ListenAndServeTLS(":8082", "../assets/certs/server.crt", "../assets/certs/server.key", mux)
+	//go http.ListenAndServeTLS(":8082", "../assets/certs/server.crt", "../assets/certs/server.key", mux)
 	http.ListenAndServe(":8080", mux)
 	log.Println("Stopping...")
 }

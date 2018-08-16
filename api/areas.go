@@ -307,11 +307,13 @@ func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reaso
 		Code   int      `json:"code"`
 		Reason string   `json:"reasone"`
 		Data   *[]*Area `json:"data"`
+		Count  int      `json:"count"`
 	}
 	result := &response{
 		Code:   code,
 		Reason: reason,
-		Data:   areas}
+		Data:   areas,
+		Count:  len(*areas)}
 	respond(w, r, http.StatusOK, &result)
 }
 
