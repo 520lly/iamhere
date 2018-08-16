@@ -130,7 +130,10 @@ func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, rea
 		Code:   code,
 		Reason: reason,
 		Data:   msgs,
-		Count:  len(*msgs)}
+		Count:  0}
+	if msgs != nil {
+		result.Count = len(*msgs)
+	}
 	//res, err := json.Marshal(result)
 	//if err != nil {
 	//    log.Fatalf("JSON marshaling failed: %s", err)

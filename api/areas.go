@@ -313,7 +313,10 @@ func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reaso
 		Code:   code,
 		Reason: reason,
 		Data:   areas,
-		Count:  len(*areas)}
+		Count:  0}
+	if areas != nil {
+		result.Count = len(*areas)
+	}
 	respond(w, r, http.StatusOK, &result)
 }
 
