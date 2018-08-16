@@ -22,6 +22,7 @@ func main() {
 	s := &Server{
 		db: db,
 	}
+	db.SetMode(mgo.Monotonic, true)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handlemessages)))
 	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleareas)))

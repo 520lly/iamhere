@@ -11,23 +11,23 @@ import (
 )
 
 const (
-	LatitudeMinimum float32 = -90 //Latitude Minimum
-	LatitudeMaximum float32 = 90  //Latitude Maximum
+	LatitudeMinimum float64 = -90 //Latitude Minimum
+	LatitudeMaximum float64 = 90  //Latitude Maximum
 )
 
 const (
-	LongitudeMinimum float32 = -180 //Longitude Minimum
-	LongitudeMaximum float32 = 180  //Longitude Maximum
+	LongitudeMinimum float64 = -180 //Longitude Minimum
+	LongitudeMaximum float64 = 180  //Longitude Maximum
 )
 
 const (
-	AltitudeMinium  float32 = -10000 //Altitude Minimum
-	AltitudeMaximum float32 = 10000  //Altitude Maximum
+	AltitudeMinium  float64 = -10000 //Altitude Minimum
+	AltitudeMaximum float64 = 10000  //Altitude Maximum
 )
 
 const (
-	RadiusMinimum float32 = 10    // Radius Minimum meters
-	RadiusMaximum float32 = 10000 // Radius Maximum
+	RadiusMinimum float64 = 10    // Radius Minimum meters
+	RadiusMaximum float64 = 10000 // Radius Maximum
 )
 
 const (
@@ -53,11 +53,17 @@ type Area struct {
 	Address2    string        `json:"address2"`
 	Category    int           `json:"category"`
 	Type        int           `json:"type"`
-	Latitude    float32       `json:"latitude"`
-	Longitude   float32       `json:"longitude"`
-	Altitude    float32       `json:"altitude"`
-	Radius      float32       `json:"radius"` //meter
+	Longitude   float64       `json:"longitude"`
+	Latitude    float64       `json:"latitude"`
+	Altitude    float64       `json:"altitude"`
+	Radius      float64       `json:"radius"` //meter
+	Location    GeoJson       `bson:"location" json:"location"`
 	APIKey      string        `json:"apikey"`
+}
+
+type GeoJson struct {
+	Type        string    `josn:"type"`
+	Coordinates []float64 `json:"coordinates"`
 }
 
 func (s *Server) handleareas(w http.ResponseWriter, r *http.Request) {
@@ -94,10 +100,76 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 		// get all areas
 		q = c.Find(nil)
 	}
+	//get all list for debugging
 	var areas []*Area
-	if err := q.All(&areas); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, err)
+	debug := r.URL.Query().Get("debug")
+	if len(debug) != 0 {
+		if err := q.All(&areas); err != nil {
+			respondErr(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		responseHandleAreas(w, r, RspOK, ReasonSuccess, &areas)
 		return
+	}
+	areaLon := r.URL.Query().Get("longitude")
+	areaLat := r.URL.Query().Get("latitude")
+	areaAlt := r.URL.Query().Get("altitude")
+	areaRad := r.URL.Query().Get("radius")
+	log.Println("area longitude: ", areaLon, "latitude: ", areaLat, "altitude: ", areaAlt, "radius: ", areaRad)
+	if len(areaLat) != 0 || len(areaLon) != 0 || len(areaAlt) != 0 || len(areaRad) != 0 {
+		if !(len(areaLat) != 0 && len(areaLon) != 0 && len(areaAlt) != 0 && len(areaRad) != 0) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
+			return
+		}
+		alon, err := strconv.ParseFloat(areaLon, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alon, LongitudeMinimum, LongitudeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+			return
+		}
+		alat, err := strconv.ParseFloat(areaLat, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		aalt, err := strconv.ParseFloat(areaAlt, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(aalt, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "altitude is out of range", nil)
+			return
+		}
+		arad, err := strconv.ParseFloat(areaRad, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleAreas(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		log.Println("area longitude: ", alon, "latitude: ", alat, "altitude: ", aalt, "radius: ", arad)
+		//find
+		err = c.Find(bson.M{
+			"location": bson.M{
+				"$nearSphere": bson.M{
+					"$geometry": bson.M{
+						"Type":        "Point",
+						"coordinates": []float64{alon, alat},
+					},
+					"$maxDistance": arad,
+				},
+			},
+		}).All(&areas)
 	}
 	areaType := r.URL.Query().Get("type")
 	if len(areaType) != 0 {
@@ -111,8 +183,8 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 			responseHandleAreas(w, r, http.StatusBadRequest, "type is out of range", nil)
 			return
 		}
-		for i, area := range areas {
-			if area.Type != t {
+		for i := len(areas) - 1; i >= 0; i-- {
+			if areas[i].Type != t {
 				areas = append(areas[:i], areas[i+1:]...)
 			}
 		}
@@ -129,53 +201,8 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 			responseHandleAreas(w, r, http.StatusBadRequest, "category is out of range", nil)
 			return
 		}
-		for i, area := range areas {
-			if area.Category != ac {
-				areas = append(areas[:i], areas[i+1:]...)
-			}
-		}
-	}
-	areaLat := r.URL.Query().Get("latitude")
-	areaLon := r.URL.Query().Get("longitude")
-	areaAlt := r.URL.Query().Get("altitude")
-	areaRad := r.URL.Query().Get("radius")
-	if len(areaLat) != 0 || len(areaLon) != 0 || len(areaAlt) != 0 || len(areaRad) != 0 {
-		if !(len(areaLat) != 0 && len(areaLon) != 0 && len(areaAlt) != 0 && len(areaRad) != 0) {
-			responseHandleAreas(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
-			return
-		}
-		alat, err := strconv.ParseFloat(areaLat, 32)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		alat32 := float32(alat)
-		alon, err := strconv.ParseFloat(areaLon, 32)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		alon32 := float32(alon)
-		aalt, err := strconv.ParseFloat(areaAlt, 32)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		aalt32 := float32(aalt)
-		arad, err := strconv.ParseFloat(areaRad, 32)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		arad32 := float32(arad)
-
-		log.Println("area latitude: ", alat32, "longitude: ", alon32, "altitude: ", aalt32, "radius: ", arad32)
-		if !checkInRangeFloat32(alat32, LatitudeMinimum, LatitudeMaximum) {
-			responseHandleAreas(w, r, http.StatusBadRequest, "latitude is out of range", nil)
-			return
-		}
-		for i, area := range areas {
-			if area.Latitude != alat32 {
+		for i := len(areas) - 1; i >= 0; i-- {
+			if areas[i].Category != ac {
 				areas = append(areas[:i], areas[i+1:]...)
 			}
 		}
@@ -236,10 +263,24 @@ func (s *Server) handleareasPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	p.Location.Coordinates = []float64{p.Longitude, p.Latitude}
+	p.Location.Type = "Point"
 	p.ID = bson.NewObjectId()
-	if err := c.Insert(p); err != nil {
+	err := c.Insert(p)
+	if err != nil {
 		responseHandleAreas(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
 		return
+	}
+	// ensure
+	// Creating the indexes
+	index := mgo.Index{
+		Key: []string{"$2dsphere:location"},
+	}
+	err = c.EnsureIndex(index)
+	if err != nil {
+		log.Println("There is index error")
+		respondErr(w, r, http.StatusBadRequest, err, nil)
+		//panic(err)
 	}
 	w.Header().Set("Location", "areas/"+p.ID.Hex())
 	responseHandleAreas(w, r, RspOK, ReasonSuccess, nil)
@@ -278,6 +319,6 @@ func checkInRange(num int, bottom int, top int) (ret bool) {
 	return num > bottom && num < top
 }
 
-func checkInRangeFloat32(num float32, bottom float32, top float32) (ret bool) {
+func checkInRangefloat64(num float64, bottom float64, top float64) (ret bool) {
 	return num > bottom && num < top
 }
