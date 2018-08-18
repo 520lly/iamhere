@@ -22,10 +22,15 @@ IP=localhost
 #curl --data '{"name":"11雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"9雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123 | jq
 
+#curl --data '{"nickname":"Mamamiya","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+curl -X GET http://$IP:8080/accounts/?key=abc123&debug=1
+curl -X GET http://$IP:8080/areas/?key=abc123&&debug=1
+exit
+
 DATA=`curl -X GET "http://$IP:8080/areas/?key=abc123&&debug=1" | jq ".data[0]"`
-data=`echo $DATA | sed 's/"/\\\"/g'`
-#echo $data
-curl --data "$DATA" -X POST "http://$IP:8080/areas/?key=abc123" | jq
+echo $DATA
+#data=`echo $DATA | sed 's/"/\\\"/g'`
+curl --data "$DATA" -X POST "http://$IP:8080/areas/?key=abc123"
 
 
 if [ ${1:-"GET"} = "DELETE" -a ${2:-"all"} ]

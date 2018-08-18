@@ -36,17 +36,17 @@ type Message struct {
 	APIKey      string        `json:"apikey"`
 }
 
-func (s *Server) handlemessages(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		s.handlemessagesGet(w, r)
+		s.handleMessagesGet(w, r)
 		return
 	case "POST":
 		log.Println("POST")
-		s.handlemessagesPost(w, r)
+		s.handleMessagesPost(w, r)
 		return
 	case "DELETE":
-		s.handlemessagesDelete(w, r)
+		s.handleMessagesDelete(w, r)
 		return
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Methods", "DELETE")
@@ -57,7 +57,7 @@ func (s *Server) handlemessages(w http.ResponseWriter, r *http.Request) {
 	respondHTTPErr(w, r, http.StatusNotFound)
 }
 
-func (s *Server) handlemessagesGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("messages")
@@ -79,8 +79,8 @@ func (s *Server) handlemessagesGet(w http.ResponseWriter, r *http.Request) {
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, &result)
 }
 
-func (s *Server) handlemessagesPost(w http.ResponseWriter, r *http.Request) {
-	log.Println("handlemessagesPost")
+func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("handleMessagesPost")
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("messages")
@@ -103,7 +103,7 @@ func (s *Server) handlemessagesPost(w http.ResponseWriter, r *http.Request) {
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
 
-func (s *Server) handlemessagesDelete(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessagesDelete(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("messages")

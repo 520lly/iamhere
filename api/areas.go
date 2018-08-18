@@ -66,16 +66,16 @@ type GeoJson struct {
 	Coordinates []float64 `json:"coordinates"`
 }
 
-func (s *Server) handleareas(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAreas(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		s.handleareasGet(w, r)
+		s.handleAreasGet(w, r)
 		return
 	case "POST":
-		s.handleareasPost(w, r)
+		s.handleAreasPost(w, r)
 		return
 	case "DELETE":
-		s.handleareasDelete(w, r)
+		s.handleAreasDelete(w, r)
 		return
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Methods", "DELETE")
@@ -86,7 +86,7 @@ func (s *Server) handleareas(w http.ResponseWriter, r *http.Request) {
 	respondHTTPErr(w, r, http.StatusNotFound)
 }
 
-func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAreasGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("areas")
@@ -211,7 +211,7 @@ func (s *Server) handleareasGet(w http.ResponseWriter, r *http.Request) {
 	responseHandleAreas(w, r, RspOK, ReasonSuccess, &areas)
 }
 
-func (s *Server) handleareasPost(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAreasPost(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("areas")
@@ -286,7 +286,7 @@ func (s *Server) handleareasPost(w http.ResponseWriter, r *http.Request) {
 	responseHandleAreas(w, r, RspOK, ReasonSuccess, nil)
 }
 
-func (s *Server) handleareasDelete(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAreasDelete(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
 	c := session.DB("iamhere").C("areas")
@@ -300,6 +300,14 @@ func (s *Server) handleareasDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responseHandleAreas(w, r, RspOK, ReasonSuccess, nil)
+}
+
+func checkInRange(num int, bottom int, top int) (ret bool) {
+	return num > bottom && num < top
+}
+
+func checkInRangefloat64(num float64, bottom float64, top float64) (ret bool) {
+	return num > bottom && num < top
 }
 
 func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reason string, areas *[]*Area) {
@@ -318,12 +326,4 @@ func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reaso
 		result.Count = len(*areas)
 	}
 	respond(w, r, http.StatusOK, &result)
-}
-
-func checkInRange(num int, bottom int, top int) (ret bool) {
-	return num > bottom && num < top
-}
-
-func checkInRangefloat64(num float64, bottom float64, top float64) (ret bool) {
-	return num > bottom && num < top
 }
