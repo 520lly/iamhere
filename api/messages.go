@@ -20,6 +20,7 @@ const (
 	ReasonFailueGeneral string = "Failure in general"
 	ReasonDuplicate     string = "Area Name duplicate"
 	ReasonInsertFailure string = "Insert failed"
+	ReasonWrongPw       string = "Wrong Password "
 )
 
 type Message struct {

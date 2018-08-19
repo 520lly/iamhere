@@ -103,6 +103,7 @@ func (s *Server) handleAreasGet(w http.ResponseWriter, r *http.Request) {
 	//get all list for debugging
 	var areas []*Area
 	debug := r.URL.Query().Get("debug")
+	log.Println("debug=", debug)
 	if len(debug) != 0 {
 		if err := q.All(&areas); err != nil {
 			respondErr(w, r, http.StatusInternalServerError, err)

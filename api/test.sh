@@ -22,9 +22,11 @@ IP=localhost
 #curl --data '{"name":"11雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"9雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123 | jq
 
-#curl --data '{"nickname":"Mamamiya","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
-curl -X GET http://$IP:8080/accounts/?key=abc123&debug=1
-curl -X GET http://$IP:8080/areas/?key=abc123&&debug=1
+#curl --data '{"nickname":"Mhajd","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+#curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
+#curl --data '{"nickname":"Mhajd","passward":"","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b78193a81b37340cc7b805d/?key=abc123&debug=1"
+curl --data '{"nickname":"Mhajd","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+#curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
 exit
 
 DATA=`curl -X GET "http://$IP:8080/areas/?key=abc123&&debug=1" | jq ".data[0]"`

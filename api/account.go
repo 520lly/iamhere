@@ -1,23 +1,29 @@
 package main
 
 import (
+	//"crypto/md5"
+	//"encoding/json"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"net/http"
+	"time"
 )
 
 type User struct {
-	ID          bson.ObjectId `json:"id "bson:"_id"`
+	ID          bson.ObjectId `json:"id bson:"_id"`
+	Password    string        `json:"passward"`
+	AssocitesId string        `json:"associatedId,omitempty" bson:"associatedId"`
 	NickName    string        `json:"nickname,omitempty"`
-	Email       string        `json:"email,omitempty"`
+	Email       string        `json:"email,omitempty" bson:"email"`
 	FirstName   string        `json:"firstname,omitempty"`
 	LastName    string        `json:"lastname,omitempty"`
-	PhoneNumber string        `json:"phonenumber,omitempty"`
+	PhoneNumber string        `json:"phonenumber" bson:"phonenumber"`
 	Birthday    string        `json:"birthday,omitempty"`
 	Gender      string        `json:"gender,omitempty"`
 	Comments    string        `json:"comments,omitempty"`
 	APIKey      string        `json:"apikey"`
+	TimeStamp   time.Time
 }
 
 func (s *Server) handleAccounts(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +57,7 @@ func (s *Server) handleAccountsGet(w http.ResponseWriter, r *http.Request) {
 	if len(debug) != 0 {
 		//get all list for debugging
 		q = c.Find(nil)
-	}
-	if u.HasID() {
+	} else if u.HasID() {
 		// get specific poll
 		q = c.FindId(bson.ObjectIdHex(u.ID))
 	} else {
@@ -73,20 +78,75 @@ func (s *Server) handleAccountsPost(w http.ResponseWriter, r *http.Request) {
 	c := session.DB("iamhere").C("users")
 	var u User
 	if err := decodeBody(r, &u); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to read poll from request", err)
+		respondErr(w, r, http.StatusBadRequest, "failed to read user information from request", err)
 		return
+	}
+	p := NewPath(r.URL.Path)
+	if p.HasID() {
+		// get specific user
+		log.Println("ID ", p.HasID(), " =", p.ID, "passward=", u.Password)
+		//pw := r.URL.Query().Get("passward")
+		if len(u.Password) != 0 {
+			var q *mgo.Query
+			q = c.FindId(bson.ObjectIdHex(p.ID))
+			var users []*User
+			if err := q.All(&users); err != nil {
+				respondErr(w, r, http.StatusInternalServerError, err)
+				return
+			}
+			//res, err := json.Marshal(users)
+			//if err != nil {
+			//    log.Fatalf("JSON marshaling failed: %s", err)
+			//}
+			//log.Println("found user:", string(res))
+			log.Println("length of users:", len(users))
+			//more than one user found it's a fatal error
+			if len(users) == 1 {
+				log.Println("Password stored:", string(users[0].Password))
+				log.Println("Password stored:", u.Password)
+				//mast check pw
+				if users[0].Password == u.Password {
+					//todo update user information
+					responseHandleAccounts(w, r, RspOK, ReasonSuccess, &users)
+					return
+				} else {
+					responseHandleAccounts(w, r, RspFailed, ReasonWrongPw, nil)
+					return
+				}
+				log.Println("NickName stored:", string(users[0].NickName))
+			} else {
+				responseHandleAccounts(w, r, RspFailed, ReasonWrongPw, nil)
+				return
+			}
+		} else {
+			responseHandleAccounts(w, r, RspFailed, ReasonMissingParam, nil)
+			return
+		}
+	}
+	if len(u.Password) == 0 {
+		responseHandleAccounts(w, r, http.StatusBadRequest, "Password is empty", nil)
+		return
+	} else if len(u.AssocitesId) == 0 && len(u.Email) == 0 && len(u.PhoneNumber) == 0 {
+		responseHandleAccounts(w, r, http.StatusBadRequest, "AssocitesId/Email/PhoneNumber must be valid at least one", nil)
+		return
+	}
+	u.TimeStamp = time.Now()
+	err := c.Find(bson.M{"name": "Tom"}).One(&user)
+	if err != nil {
+		panic(err)
 	}
 	apikey, ok := APIKey(r.Context())
 	if ok {
 		u.APIKey = apikey
 	}
 	u.ID = bson.NewObjectId()
+	//has := md5.Sum(u.)
 	if err := c.Insert(u); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, "failed to insert poll", err)
+		respondErr(w, r, http.StatusInternalServerError, "failed to insert user", err)
 		return
 	}
 	w.Header().Set("Location", "users/"+u.ID.Hex())
-	respond(w, r, http.StatusCreated, nil)
+	responseHandleAccounts(w, r, http.StatusCreated, ReasonSuccess, nil)
 }
 
 func (s *Server) handleAccountsDelete(w http.ResponseWriter, r *http.Request) {
