@@ -24,8 +24,8 @@ IP=localhost
 
 #curl --data '{"nickname":"Mhajd","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
 #curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
-#curl --data '{"nickname":"Mhajd","passward":"","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b78193a81b37340cc7b805d/?key=abc123&debug=1"
-curl --data '{"nickname":"Mhajd","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+#curl --data '{"nickname":"Mhajd","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
+curl --data '{"nickname":"hahahah","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
 #curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
 exit
 

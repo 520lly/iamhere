@@ -2,7 +2,8 @@ package main
 
 import (
 	//"crypto/md5"
-	//"encoding/json"
+	"encoding/json"
+	//"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
@@ -11,7 +12,7 @@ import (
 )
 
 type User struct {
-	ID          bson.ObjectId `json:"id bson:"_id"`
+	ID          bson.ObjectId `json:"id" bson:"_id"`
 	Password    string        `json:"passward"`
 	AssocitesId string        `json:"associatedId,omitempty" bson:"associatedId"`
 	NickName    string        `json:"nickname,omitempty"`
@@ -59,6 +60,10 @@ func (s *Server) handleAccountsGet(w http.ResponseWriter, r *http.Request) {
 		q = c.Find(nil)
 	} else if u.HasID() {
 		// get specific poll
+		if !bson.IsObjectIdHex(u.ID) {
+			responseHandleAccounts(w, r, RspFailed, ReasonFailureParam, nil)
+			return
+		}
 		q = c.FindId(bson.ObjectIdHex(u.ID))
 	} else {
 		responseHandleAccounts(w, r, RspOK, ReasonMissingParam, nil)
@@ -85,35 +90,37 @@ func (s *Server) handleAccountsPost(w http.ResponseWriter, r *http.Request) {
 	if p.HasID() {
 		// get specific user
 		log.Println("ID ", p.HasID(), " =", p.ID, "passward=", u.Password)
-		//pw := r.URL.Query().Get("passward")
 		if len(u.Password) != 0 {
-			var q *mgo.Query
-			q = c.FindId(bson.ObjectIdHex(p.ID))
-			var users []*User
-			if err := q.All(&users); err != nil {
-				respondErr(w, r, http.StatusInternalServerError, err)
+			user := User{}
+			if err := c.FindId(bson.ObjectIdHex(p.ID)).One(&user); err != nil {
+				responseHandleAccounts(w, r, RspFailed, ReasonFailureParam, nil)
 				return
 			}
-			//res, err := json.Marshal(users)
-			//if err != nil {
-			//    log.Fatalf("JSON marshaling failed: %s", err)
-			//}
-			//log.Println("found user:", string(res))
-			log.Println("length of users:", len(users))
-			//more than one user found it's a fatal error
-			if len(users) == 1 {
-				log.Println("Password stored:", string(users[0].Password))
-				log.Println("Password stored:", u.Password)
-				//mast check pw
-				if users[0].Password == u.Password {
-					//todo update user information
-					responseHandleAccounts(w, r, RspOK, ReasonSuccess, &users)
-					return
-				} else {
-					responseHandleAccounts(w, r, RspFailed, ReasonWrongPw, nil)
+			userj, err := json.Marshal(user)
+			if err != nil {
+				log.Fatalf("JSON marshaling failed: %s", err)
+			}
+			log.Println("found user:", string(userj))
+			log.Println("Password stored:", string(user.Password))
+			log.Println("Password received:", u.Password)
+			//mast check pw
+			if user.Password == u.Password {
+				//todo update user information
+				if len(u.Email) != 0 {
+					log.Println("Update user via email:", u.Email)
+					upsertdata := bson.M{"$set": u}
+					_, err = c.UpsertId(p.ID, upsertdata)
+					if err != nil {
+						log.Fatalf("UpsertId failed: %s", err)
+					}
+					//fmt.Println("UpsertId -> ", info, err)
+					//c.Upsert(
+					//    bson.M{"email": u.Email},
+					//    bson.M{"$set": bson.M{"nickname": "My name was updated"}},
+					//)
+					responseHandleAccounts(w, r, RspOK, ReasonSuccess, nil)
 					return
 				}
-				log.Println("NickName stored:", string(users[0].NickName))
 			} else {
 				responseHandleAccounts(w, r, RspFailed, ReasonWrongPw, nil)
 				return
@@ -131,16 +138,11 @@ func (s *Server) handleAccountsPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.TimeStamp = time.Now()
-	err := c.Find(bson.M{"name": "Tom"}).One(&user)
-	if err != nil {
-		panic(err)
-	}
 	apikey, ok := APIKey(r.Context())
 	if ok {
 		u.APIKey = apikey
 	}
 	u.ID = bson.NewObjectId()
-	//has := md5.Sum(u.)
 	if err := c.Insert(u); err != nil {
 		respondErr(w, r, http.StatusInternalServerError, "failed to insert user", err)
 		return
