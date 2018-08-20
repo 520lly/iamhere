@@ -13,14 +13,15 @@ const (
 	RspFailed int = -1
 )
 const (
-	ReasonSuccess       string = "Success"
-	ReasonFailureParam  string = "Wrong parameter"
-	ReasonMissingParam  string = "Missing parameter"
-	ReasonFailureAPIKey string = "Wrong APIKey"
-	ReasonFailueGeneral string = "Failure in general"
-	ReasonDuplicate     string = "Area Name duplicate"
-	ReasonInsertFailure string = "Insert failed"
-	ReasonWrongPw       string = "Wrong Password "
+	ReasonSuccess         string = "Success"
+	ReasonFailureParam    string = "Wrong parameter"
+	ReasonMissingParam    string = "Missing parameter"
+	ReasonFailureAPIKey   string = "Wrong APIKey"
+	ReasonFailueGeneral   string = "Failure in general"
+	ReasonDuplicate       string = "Parameter duplicated"
+	ReasonInsertFailure   string = "Insert failed"
+	ReasonWrongPw         string = "Wrong Password "
+	ReasonOperationFailed string = "Operation Failure "
 )
 
 type Message struct {
@@ -61,6 +62,7 @@ func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	var q *mgo.Query
 	p := NewPath(r.URL.Path)
@@ -84,6 +86,7 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("handleMessagesPost")
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	var p Message
 	if err := decodeBody(r, &p); err != nil {
@@ -107,6 +110,7 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMessagesDelete(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	p := NewPath(r.URL.Path)
 	if !p.HasID() {

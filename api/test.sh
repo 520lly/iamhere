@@ -22,11 +22,21 @@ IP=localhost
 #curl --data '{"name":"11雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"9雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123 | jq
 
-#curl --data '{"nickname":"Mhajd","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+#curl --data '{"nickname":"mnma","password":"12345ddqw", "email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
+#curl --data '{"nickname":"Mhajd","associatedId":"wechat_djakdjakdj","password":"testtttt","email":"jackaing.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
-#curl --data '{"nickname":"Mhajd","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
-curl --data '{"nickname":"hahahah","passward":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
+#curl --data '{"nickname":"hahahah","password":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
 #curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
+curl --data '{"nickname":"hajd"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"associatedId":"wechat_djjakdj"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"password":"ddsdsesttttt"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"email":"jackaing.wang.wjdadq@gmail.com"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"firstname":"hdkajdka"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"lastname":"jliang"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"phonenumber":"13167722399"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"birthday":"19910919"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+curl --data '{"gender":"female"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+#curl -X DELETE "http://$IP:8080/accounts/${1:-""}/?key=abc123" | jq
 exit
 
 DATA=`curl -X GET "http://$IP:8080/areas/?key=abc123&&debug=1" | jq ".data[0]"`
