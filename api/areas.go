@@ -314,7 +314,7 @@ func checkInRangefloat64(num float64, bottom float64, top float64) (ret bool) {
 func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reason string, areas *[]*Area) {
 	type response struct {
 		Code   int      `json:"code"`
-		Reason string   `json:"reasone"`
+		Reason string   `json:"reason"`
 		Data   *[]*Area `json:"data"`
 		Count  int      `json:"count"`
 	}

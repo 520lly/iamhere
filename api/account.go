@@ -301,7 +301,7 @@ func updateField(collection *mgo.Collection, id string, key string, val string) 
 func responseHandleAccounts(w http.ResponseWriter, r *http.Request, code int, reason string, users *[]*User) {
 	type response struct {
 		Code   int      `json:"code"`
-		Reason string   `json:"reasone"`
+		Reason string   `json:"reason"`
 		Data   *[]*User `json:"data"`
 		Count  int      `json:"count"`
 	}

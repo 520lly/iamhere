@@ -127,7 +127,7 @@ func (s *Server) handleMessagesDelete(w http.ResponseWriter, r *http.Request) {
 func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, reason string, msgs *[]*Message) {
 	type response struct {
 		Code   int         `json:"code"`
-		Reason string      `json:"reasone"`
+		Reason string      `json:"reason"`
 		Data   *[]*Message `json:"data"`
 		Count  int         `json:"count"`
 	}
@@ -139,10 +139,5 @@ func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, rea
 	if msgs != nil {
 		result.Count = len(*msgs)
 	}
-	//res, err := json.Marshal(result)
-	//if err != nil {
-	//    log.Fatalf("JSON marshaling failed: %s", err)
-	//}
-	//log.Println(string(res))
 	respond(w, r, http.StatusOK, &result)
 }
