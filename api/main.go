@@ -6,6 +6,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -23,13 +25,16 @@ func main() {
 		db: db,
 	}
 	db.SetMode(mgo.Monotonic, true)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handleMessages)))
-	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleAreas)))
-	mux.HandleFunc("/accounts/", withCORS(withAPIKey(s.handleAccounts)))
+	//mux := http.NewServeMux()
+	router := mux.NewRouter()
+	router.HandleFunc("/authenticate", withCORS(CreateTokenEndpoint)).Methods("POST")
+	router.HandleFunc("/messages/", withCORS(ValidateMiddleware(s.handleMessages)))
+	router.HandleFunc("/areas/", withCORS(ValidateMiddleware(s.handleAreas)))
+	router.HandleFunc("/accounts/", withCORS(ValidateMiddleware(s.handleAccounts)))
+	router.HandleFunc("/auth/", withCORS(ValidateMiddleware(s.handleAccounts)))
 	log.Println("Starting web server on", *addr)
 	//go http.ListenAndServeTLS(":8082", "../assets/certs/server.crt", "../assets/certs/server.key", mux)
-	http.ListenAndServe(":8080", mux)
+	http.ListenAndServe(":8080", router)
 	log.Println("Stopping...")
 }
 

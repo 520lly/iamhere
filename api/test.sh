@@ -24,8 +24,10 @@ IP=localhost
 
 #curl --data '{"nickname":"mnma","password":"12345ddqw", "email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/?key=abc123"
 #curl --data '{"nickname":"Mhajd","associatedId":"wechat_djakdjakdj","password":"testtttt","email":"jackaing.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
-curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
+#curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
 #curl --data '{"nickname":"hahahah","password":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
+#curl --data '{"username":"hahahah","password":"testtttt"}' -X POST "http://$IP:8080/authenticate"
+curl --data '{username":"hahahah","password":"testtttt"}' -X POST "http://$IP:8080/authenticate"
 #curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
 #curl --data '{"nickname":"hajd"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl --data '{"associatedId":"wechat_djjakdj"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
@@ -35,7 +37,7 @@ curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
 #curl --data '{"lastname":"jliang"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl --data '{"phonenumber":"13167722399"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl --data '{"birthday":"19910919"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
-curl --data '{"gender":"male"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
+#curl --data '{"gender":"male"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl -X DELETE "http://$IP:8080/accounts/${1:-""}/?key=abc123" | jq
 exit
 

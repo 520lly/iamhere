@@ -13,6 +13,7 @@ import (
 
 type User struct {
 	ID           bson.ObjectId `json:"id" bson:"_id"`
+	Username     string        `json:"username"`
 	Password     string        `json:"password"`
 	AssociatedId string        `json:"associatedId,omitempty" bson:"associatedId"`
 	NickName     string        `json:"nickname,omitempty"`
