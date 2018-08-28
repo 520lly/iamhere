@@ -13,10 +13,15 @@ const (
 	RspFailed int = -1
 )
 const (
-	ReasonSuccess       string = "Success"
-	ReasonFailureParam  string = "Wrong parameter"
-	ReasonFailureAPIKey string = "Wrong APIKey"
-	ReasonFailueGeneral string = "Failure in general"
+	ReasonSuccess         string = "Success"
+	ReasonFailureParam    string = "Wrong parameter"
+	ReasonMissingParam    string = "Missing parameter"
+	ReasonFailureAPIKey   string = "Wrong APIKey"
+	ReasonFailueGeneral   string = "Failure in general"
+	ReasonDuplicate       string = "Parameter duplicated"
+	ReasonInsertFailure   string = "Insert failed"
+	ReasonWrongPw         string = "Wrong Password "
+	ReasonOperationFailed string = "Operation Failure "
 )
 
 type Message struct {
@@ -33,23 +38,17 @@ type Message struct {
 	APIKey      string        `json:"apikey"`
 }
 
-type Response struct {
-	Code   int         `json:"code"`
-	Reason string      `json:"reasone"`
-	Data   *[]*Message `json:"data"`
-}
-
-func (s *Server) handlemessages(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		s.handlemessagesGet(w, r)
+		s.handleMessagesGet(w, r)
 		return
 	case "POST":
 		log.Println("POST")
-		s.handlemessagesPost(w, r)
+		s.handleMessagesPost(w, r)
 		return
 	case "DELETE":
-		s.handlemessagesDelete(w, r)
+		s.handleMessagesDelete(w, r)
 		return
 	case "OPTIONS":
 		w.Header().Set("Access-Control-Allow-Methods", "DELETE")
@@ -60,9 +59,10 @@ func (s *Server) handlemessages(w http.ResponseWriter, r *http.Request) {
 	respondHTTPErr(w, r, http.StatusNotFound)
 }
 
-func (s *Server) handlemessagesGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	var q *mgo.Query
 	p := NewPath(r.URL.Path)
@@ -82,10 +82,11 @@ func (s *Server) handlemessagesGet(w http.ResponseWriter, r *http.Request) {
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, &result)
 }
 
-func (s *Server) handlemessagesPost(w http.ResponseWriter, r *http.Request) {
-	log.Println("handlemessagesPost")
+func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("handleMessagesPost")
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	var p Message
 	if err := decodeBody(r, &p); err != nil {
@@ -106,9 +107,10 @@ func (s *Server) handlemessagesPost(w http.ResponseWriter, r *http.Request) {
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
 
-func (s *Server) handlemessagesDelete(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleMessagesDelete(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
+	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	p := NewPath(r.URL.Path)
 	if !p.HasID() {
@@ -121,11 +123,22 @@ func (s *Server) handlemessagesDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
+
 func responseHandleMessage(w http.ResponseWriter, r *http.Request, code int, reason string, msgs *[]*Message) {
-	result := &Response{
+	type response struct {
+		Code   int         `json:"code"`
+		Reason string      `json:"reasone"`
+		Data   *[]*Message `json:"data"`
+		Count  int         `json:"count"`
+	}
+	result := &response{
 		Code:   code,
 		Reason: reason,
-		Data:   msgs}
+		Data:   msgs,
+		Count:  0}
+	if msgs != nil {
+		result.Count = len(*msgs)
+	}
 	//res, err := json.Marshal(result)
 	//if err != nil {
 	//    log.Fatalf("JSON marshaling failed: %s", err)
