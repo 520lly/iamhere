@@ -53,12 +53,12 @@ type Area struct {
 	Address2    string        `json:"address2"`
 	Category    int           `json:"category"`
 	Type        int           `json:"type"`
-	Longitude   float64       `json:"longitude"`
-	Latitude    float64       `json:"latitude"`
 	Altitude    float64       `json:"altitude"`
 	Radius      float64       `json:"radius"` //meter
 	Location    GeoJson       `bson:"location" json:"location"`
 	APIKey      string        `json:"apikey"`
+	Longitude   float64       `json:"longitude"`
+	Latitude    float64       `json:"latitude"`
 }
 
 type GeoJson struct {
@@ -145,7 +145,7 @@ func (s *Server) handleAreasGet(w http.ResponseWriter, r *http.Request) {
 			respondErr(w, r, http.StatusBadRequest, err)
 			return
 		}
-		if !checkInRangefloat64(aalt, LatitudeMinimum, LatitudeMaximum) {
+		if !checkInRangefloat64(aalt, AltitudeMinium, AltitudeMaximum) {
 			responseHandleAreas(w, r, http.StatusBadRequest, "altitude is out of range", nil)
 			return
 		}

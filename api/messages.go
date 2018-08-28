@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -29,13 +31,14 @@ type Message struct {
 	AreaID      string        `json:"areaid" bson:"areaid"`
 	UserID      string        `json:"userid" bson:"userid"`
 	Content     string        `json:"content" bson:"content"`
-	TimeStamp   int           `json:"timestamp"`
 	UserDefAddr string        `json:"userdefaddr" bson:"userdefaddr"`
-	ExpiryTime  int           `json:"expirytime"`
-	Latitude    int           `json:"latitude"`
-	Longitude   int           `json:"longitude"`
-	Altitude    int           `json:"altitude"`
+	ExpiryTime  int64         `json:"expirytime"`
+	Altitude    float64       `json:"altitude"`
+	Location    GeoJson       `bson:"location" json:"location"`
 	APIKey      string        `json:"apikey"`
+	Latitude    float64       `json:"latitude"`
+	Longitude   float64       `json:"longitude"`
+	TimeStamp   time.Time
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
@@ -62,48 +65,149 @@ func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	session := s.db.Copy()
 	defer session.Close()
-	// Collection Message
 	c := session.DB("iamhere").C("messages")
 	var q *mgo.Query
 	p := NewPath(r.URL.Path)
 	if p.HasID() {
-		// get specific message
+		// get specific messages
+		log.Println("ID ", p.HasID())
 		q = c.FindId(bson.ObjectIdHex(p.ID))
-		//[TODO] more filter for specific messages
 	} else {
 		// get all messages
 		q = c.Find(nil)
 	}
-	var result []*Message
-	if err := q.All(&result); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, err)
+	//get all list for debugging
+	var msgs []*Message
+	debug := r.URL.Query().Get("debug")
+	log.Println("debug=", debug)
+	if len(debug) != 0 {
+		if err := q.All(&msgs); err != nil {
+			respondErr(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		log.Println("msgs size", len(msgs))
+		responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 		return
 	}
-	responseHandleMessage(w, r, RspOK, ReasonSuccess, &result)
+	msgLon := r.URL.Query().Get("longitude")
+	msgLat := r.URL.Query().Get("latitude")
+	msgAlt := r.URL.Query().Get("altitude")
+	msgRad := r.URL.Query().Get("radius")
+	log.Println("Message longitude: ", msgLon, "latitude: ", msgLat, "altitude: ", msgAlt, "radius: ", msgRad)
+	if len(msgLat) != 0 || len(msgLon) != 0 || len(msgAlt) != 0 || len(msgRad) != 0 {
+		if !(len(msgLat) != 0 && len(msgLon) != 0 && len(msgAlt) != 0 && len(msgRad) != 0) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
+			return
+		}
+		alon, err := strconv.ParseFloat(msgLon, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alon, LongitudeMinimum, LongitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+			return
+		}
+		alat, err := strconv.ParseFloat(msgLat, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		aalt, err := strconv.ParseFloat(msgAlt, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(aalt, AltitudeMinium, AltitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "altitude is out of range", nil)
+			return
+		}
+		arad, err := strconv.ParseFloat(msgRad, 64)
+		if err != nil {
+			respondErr(w, r, http.StatusBadRequest, err)
+			return
+		}
+		if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		log.Println("msg longitude: ", alon, "latitude: ", alat, "altitude: ", aalt, "radius: ", arad)
+		//find
+		err = c.Find(bson.M{
+			"location": bson.M{
+				"$nearSphere": bson.M{
+					"$geometry": bson.M{
+						"Type":        "Point",
+						"coordinates": []float64{alon, alat},
+					},
+					"$maxDistance": arad,
+				},
+			},
+		}).All(&msgs)
+	} else {
+		/*check area id??*/
+	}
+	//check ExpiryTime and remove none expiry messages
+	for i := len(msgs) - 1; i >= 0; i-- {
+		if msgs[i].ExpiryTime > time.Now().Unix() {
+			msgs = append(msgs[:i], msgs[i+1:]...)
+		}
+	}
+	log.Println("msgs size", len(msgs))
+	responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 }
 
 func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("handleMessagesPost")
 	session := s.db.Copy()
 	defer session.Close()
-	// Collection Message
 	c := session.DB("iamhere").C("messages")
-	var p Message
-	if err := decodeBody(r, &p); err != nil {
-		respondErr(w, r, http.StatusBadRequest, "failed to read message from request", err)
+	var m Message
+	if err := decodeBody(r, &m); err != nil {
+		respondErr(w, r, http.StatusBadRequest, "failed to read msg from request!! error:", err)
 		return
 	}
-	apikey, ok := APIKey(r.Context())
-	if !ok {
-		responseHandleMessage(w, r, RspFailed, ReasonFailureAPIKey, nil)
+	if len(m.UserID) == 0 {
+		responseHandleMessage(w, r, http.StatusBadRequest, "UserID is empty", nil)
+		return
+	} else if len(m.Content) == 0 {
+		responseHandleMessage(w, r, http.StatusBadRequest, "Content is empty", nil)
+		return
+	} else if m.Latitude >= LatitudeMaximum || m.Latitude <= LatitudeMinimum {
+		responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+		return
+	} else if m.Longitude >= LongitudeMaximum || m.Longitude <= LongitudeMinimum {
+		responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+		return
+	} else if m.ExpiryTime == 0 {
+		m.ExpiryTime = time.Now().Unix()
 	}
-	p.APIKey = apikey
-	p.ID = bson.NewObjectId()
-	if err := c.Insert(p); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, "failed to insert message", err)
+	log.Println("msg longitude: ", m.Longitude, "latitude: ", m.Latitude, "altitude: ", m.Altitude)
+
+	m.TimeStamp = time.Now()
+	m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
+	m.Location.Type = "Point"
+	m.ID = bson.NewObjectId()
+	err := c.Insert(m)
+	if err != nil {
+		responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
 		return
 	}
-	w.Header().Set("Location", "messages/"+p.ID.Hex())
+	// ensure
+	// Creating the indexes
+	index := mgo.Index{
+		Key: []string{"$2dsphere:location"},
+	}
+	err = c.EnsureIndex(index)
+	if err != nil {
+		log.Println("There is index error")
+		respondErr(w, r, http.StatusBadRequest, err, nil)
+	}
+	w.Header().Set("Location", "message/"+m.ID.Hex())
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
 
