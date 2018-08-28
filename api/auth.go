@@ -42,7 +42,7 @@ func ValidateMiddleware(next http.HandlerFunc) http.HandlerFunc {
 					if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 						return nil, fmt.Errorf("There was an error")
 					}
-					return []byte("secret"), nil
+					return []byte("secretcridentialforiamhere"), nil
 				})
 				if error != nil {
 					json.NewEncoder(w).Encode(Exception{Message: error.Error()})
