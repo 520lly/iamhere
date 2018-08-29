@@ -11,6 +11,10 @@ import (
 )
 
 const (
+	MessageTypeOcean string = "Ocean"
+)
+
+const (
 	RspOK     int = 0
 	RspFailed int = -1
 )
@@ -38,7 +42,7 @@ type Message struct {
 	APIKey      string        `json:"apikey"`
 	Latitude    float64       `json:"latitude"`
 	Longitude   float64       `json:"longitude"`
-	TimeStamp   time.Time
+	TimeStamp   time.Time     `json:"timestamp"`
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +97,7 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	msgLat := r.URL.Query().Get("latitude")
 	msgAlt := r.URL.Query().Get("altitude")
 	msgRad := r.URL.Query().Get("radius")
-	log.Println("Message longitude: ", msgLon, "latitude: ", msgLat, "altitude: ", msgAlt, "radius: ", msgRad)
+	log.Println("URL Quary Message longitude: ", msgLon, "latitude: ", msgLat, "altitude: ", msgAlt, "radius: ", msgRad)
 	if len(msgLat) != 0 || len(msgLon) != 0 || len(msgAlt) != 0 || len(msgRad) != 0 {
 		if !(len(msgLat) != 0 && len(msgLon) != 0 && len(msgAlt) != 0 && len(msgRad) != 0) {
 			responseHandleMessage(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
@@ -149,7 +153,48 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 			},
 		}).All(&msgs)
 	} else {
-		/*check area id??*/
+		var m Message
+		if err := decodeBody(r, &m); err != nil {
+			respondErr(w, r, http.StatusBadRequest, "failed to read msg from request!! error:", err)
+			return
+		}
+		log.Println("Request Quary data longitude: ", m.Longitude, "latitude: ", m.Latitude)
+		if !checkInRangefloat64(m.Longitude, LongitudeMinimum, LongitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+			return
+		}
+		if !checkInRangefloat64(m.Latitude, LatitudeMinimum, LatitudeMaximum) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		}
+		area := s.findAreaWithLocation(m.Longitude, m.Latitude)
+		if area != nil {
+			//find
+			err := c.Find(bson.M{
+				"location": bson.M{
+					"$nearSphere": bson.M{
+						"$geometry": bson.M{
+							"Type":        "Point",
+							"coordinates": []float64{m.Longitude, m.Latitude},
+						},
+						"$maxDistance": area.Radius,
+					},
+				},
+			}).All(&msgs)
+			if err != nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
+			log.Println("msgs size", len(msgs))
+		} else {
+			//return some of messages from Ocean
+			err := session.DB("iamhere").C("msgcoean").Find(nil).Limit(10).All(&msgs)
+			if err != nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
+			log.Println("msgs size", len(msgs))
+		}
 	}
 	//check ExpiryTime and remove none expiry messages
 	for i := len(msgs) - 1; i >= 0; i-- {
@@ -163,9 +208,6 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("handleMessagesPost")
-	session := s.db.Copy()
-	defer session.Close()
-	c := session.DB("iamhere").C("messages")
 	var m Message
 	if err := decodeBody(r, &m); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "failed to read msg from request!! error:", err)
@@ -192,20 +234,47 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
 	m.Location.Type = "Point"
 	m.ID = bson.NewObjectId()
-	err := c.Insert(m)
-	if err != nil {
-		responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
-		return
-	}
-	// ensure
-	// Creating the indexes
-	index := mgo.Index{
-		Key: []string{"$2dsphere:location"},
-	}
-	err = c.EnsureIndex(index)
-	if err != nil {
-		log.Println("There is index error")
-		respondErr(w, r, http.StatusBadRequest, err, nil)
+	session := s.db.Copy()
+	defer session.Close()
+	var c *mgo.Collection
+	area := s.findAreaWithLocation(m.Longitude, m.Latitude)
+	if area != nil {
+		m.AreaID = string(bson.ObjectId(area.ID).Hex())
+		c = session.DB("iamhere").C("messages")
+		err := c.Insert(m)
+		if err != nil {
+			responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
+			return
+		}
+		// ensure
+		// Creating the indexes
+		index := mgo.Index{
+			Key: []string{"$2dsphere:location"},
+		}
+		err = c.EnsureIndex(index)
+		if err != nil {
+			log.Println("There is index error")
+			respondErr(w, r, http.StatusBadRequest, err, nil)
+		}
+	} else {
+		//it's a none area belonging message
+		m.AreaID = MessageTypeOcean
+		c = session.DB("iamhere").C("msgcoean")
+		err := c.Insert(m)
+		if err != nil {
+			responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
+			return
+		}
+		// ensure
+		// Creating the indexes
+		index := mgo.Index{
+			Key: []string{"$2dsphere:location"},
+		}
+		err = c.EnsureIndex(index)
+		if err != nil {
+			log.Println("There is index error")
+			respondErr(w, r, http.StatusBadRequest, err, nil)
+		}
 	}
 	w.Header().Set("Location", "message/"+m.ID.Hex())
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -309,6 +309,52 @@ func checkInRange(num int, bottom int, top int) (ret bool) {
 
 func checkInRangefloat64(num float64, bottom float64, top float64) (ret bool) {
 	return num > bottom && num < top
+}
+
+func (s *Server) findAreaWithLocation(long float64, lat float64) (ret *Area) {
+	session := s.db.Copy()
+	defer session.Close()
+	c := session.DB("iamhere").C("areas")
+	areas := findAllArea(session)
+	if areas != nil {
+		for _, area := range areas {
+			var areaMatchs []*Area
+			err := c.Find(bson.M{
+				"location": bson.M{
+					"$nearSphere": bson.M{
+						"$geometry": bson.M{
+							"Type":        "Point",
+							"coordinates": []float64{long, lat},
+						},
+						"$maxDistance": area.Radius,
+					},
+				},
+			}).All(&areaMatchs)
+			if err != nil {
+				return nil
+			}
+			if len(areaMatchs) == 1 && areaMatchs[0].ID == area.ID {
+				areaMatchJ, err := json.Marshal(areaMatchs[0])
+				if err != nil {
+					log.Fatalf("JSON marshaling failed: %s", err)
+				}
+				log.Println("found Area:", string(areaMatchJ))
+				return areaMatchs[0]
+			}
+		}
+	}
+	return nil
+}
+
+func findAllArea(session *mgo.Session) (ret []*Area) {
+	c := session.DB("iamhere").C("areas")
+	var q *mgo.Query
+	q = c.Find(nil)
+	var areas []*Area
+	if err := q.All(&areas); err != nil {
+		return nil
+	}
+	return areas
 }
 
 func responseHandleAreas(w http.ResponseWriter, r *http.Request, code int, reason string, areas *[]*Area) {
