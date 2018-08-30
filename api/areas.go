@@ -60,7 +60,8 @@ type Area struct {
 	APIKey      string        `json:"apikey"`
 	Longitude   float64       `json:"longitude"`
 	Latitude    float64       `json:"latitude"`
-	TimeStamp   time.Time     `json:"timestamp"`
+	TimeStamp   int64         `json:"timestamp"`
+	//TimeStamp   time.Time     `json:"timestamp"`
 }
 
 type GeoJson struct {
@@ -269,7 +270,7 @@ func (s *Server) handleAreasPost(w http.ResponseWriter, r *http.Request) {
 	p.Location.Coordinates = []float64{p.Longitude, p.Latitude}
 	p.Location.Type = "Point"
 	p.ID = bson.NewObjectId()
-	p.TimeStamp = time.Now()
+	p.TimeStamp = time.Now().Unix()
 	err := c.Insert(p)
 	if err != nil {
 		responseHandleAreas(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)

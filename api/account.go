@@ -24,7 +24,8 @@ type User struct {
 	Gender       string        `json:"gender,omitempty"`
 	Comments     string        `json:"comments,omitempty"`
 	APIKey       string        `json:"apikey"`
-	TimeStamp    time.Time     `json:"timestamp"`
+	TimeStamp    int64         `json:"timestamp"`
+	//TimeStamp    time.Time     `json:"timestamp"`
 }
 
 func (s *Server) handleAccounts(w http.ResponseWriter, r *http.Request) {
@@ -255,7 +256,7 @@ func (s *Server) handleAccountsPost(w http.ResponseWriter, r *http.Request) {
 			responseHandleAccounts(w, r, http.StatusBadRequest, "AssocitesId/Email/PhoneNumber must be valid at least one", nil)
 			return
 		}
-		u.TimeStamp = time.Now()
+		u.TimeStamp = time.Now().Unix()
 		apikey, ok := APIKey(r.Context())
 		if ok {
 			u.APIKey = apikey

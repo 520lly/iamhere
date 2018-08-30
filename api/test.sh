@@ -13,7 +13,7 @@ set -e                     #exit when error hanppens
 IP=localhost
 data='{"areaid":"test","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":1000}'
 
-#curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
+curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
 ###curl --data '{"title":"test","options":["one","two","three"]}' -X POST http://$IP:8080/polls/?key=abc123
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
 #curl -X GET "http://$IP:8080/messages/?key=abc123&&debug=1"

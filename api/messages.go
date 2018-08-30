@@ -43,7 +43,8 @@ type Message struct {
 	APIKey      string        `json:"apikey"`
 	Latitude    float64       `json:"latitude"`
 	Longitude   float64       `json:"longitude"`
-	TimeStamp   time.Time     `json:"timestamp"`
+	TimeStamp   int64         `json:"timestamp"`
+	//TimeStamp   time.Time     `json:"timestamp"`
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
@@ -231,7 +232,7 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("msg longitude: ", m.Longitude, "latitude: ", m.Latitude, "altitude: ", m.Altitude)
 
-	m.TimeStamp = time.Now()
+	m.TimeStamp = time.Now().Unix()
 	m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
 	m.Location.Type = "Point"
 	m.ID = bson.NewObjectId()
