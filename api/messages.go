@@ -101,8 +101,8 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	msgRad := r.URL.Query().Get("radius")
 	log.Println("URL Quary Message longitude: ", msgLon, "latitude: ", msgLat, "altitude: ", msgAlt, "radius: ", msgRad)
 	if len(msgLat) != 0 || len(msgLon) != 0 || len(msgAlt) != 0 || len(msgRad) != 0 {
-		if !(len(msgLat) != 0 && len(msgLon) != 0 && len(msgAlt) != 0 && len(msgRad) != 0) {
-			responseHandleMessage(w, r, http.StatusBadRequest, "latitude,longitude, altitude, radius must be valid at the same time", nil)
+		if !(len(msgLat) != 0 && len(msgLon) != 0) {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude,longitude must be valid at the same time", nil)
 			return
 		}
 		alon, err := strconv.ParseFloat(msgLon, 64)
@@ -123,26 +123,31 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
 			return
 		}
-		aalt, err := strconv.ParseFloat(msgAlt, 64)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		if !checkInRangefloat64(aalt, AltitudeMinium, AltitudeMaximum) {
-			responseHandleMessage(w, r, http.StatusBadRequest, "altitude is out of range", nil)
-			return
-		}
-		arad, err := strconv.ParseFloat(msgRad, 64)
-		if err != nil {
-			respondErr(w, r, http.StatusBadRequest, err)
-			return
-		}
-		if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
-			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
-			return
-		}
-		log.Println("msg longitude: ", alon, "latitude: ", alat, "altitude: ", aalt, "radius: ", arad)
+		//aalt, err := strconv.ParseFloat(msgAlt, 64)
+		//if err != nil {
+		//    respondErr(w, r, http.StatusBadRequest, err)
+		//    return
+		//}
+		//if !checkInRangefloat64(aalt, AltitudeMinium, AltitudeMaximum) {
+		//    responseHandleMessage(w, r, http.StatusBadRequest, "altitude is out of range", nil)
+		//    return
+		//}
+		//arad, err := strconv.ParseFloat(msgRad, 64)
+		//if err != nil {
+		//    respondErr(w, r, http.StatusBadRequest, err)
+		//    return
+		//}
+		//if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
+		//    responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+		//    return
+		//}
+		log.Println("msg longitude: ", alon, "latitude: ", alat)
 		//find
+		area := s.findAreaWithLocation(alon, alat)
+		if area == nil {
+			responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+			return
+		}
 		err = c.Find(bson.M{
 			"location": bson.M{
 				"$nearSphere": bson.M{
@@ -150,7 +155,7 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 						"Type":        "Point",
 						"coordinates": []float64{alon, alat},
 					},
-					"$maxDistance": arad,
+					"$maxDistance": area.Radius,
 				},
 			},
 		}).All(&msgs)
