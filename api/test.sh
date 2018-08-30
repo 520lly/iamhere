@@ -9,11 +9,11 @@ __version__=0.1
 #set -x                     #print every excution log
 set -e                     #exit when error hanppens
 
-#IP=35.187.154.122
-IP=localhost
+IP=35.187.154.122
+#IP=localhost
 data='{"areaid":"test","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":1000}'
 
-curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
+#curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
 ###curl --data '{"title":"test","options":["one","two","three"]}' -X POST http://$IP:8080/polls/?key=abc123
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
 #curl -X GET "http://$IP:8080/messages/?key=abc123&&debug=1"
@@ -29,7 +29,7 @@ curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
 #curl --data '{"nickname":"hahahah","password":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
 #curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
 
-curl -d '{"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0}' -X GET "http://$IP:8080/messages/?key=abc123"
+curl -d '{"latitude":39.7039399637,"longitude":121.1754884604,"altitude":0}' -X GET "http://$IP:8080/messages/?key=abc123"
 
 exit
 curl --data '{"nickname":"hajd"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"

@@ -144,21 +144,33 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 		log.Println("msg longitude: ", alon, "latitude: ", alat)
 		//find
 		area := s.findAreaWithLocation(alon, alat)
-		if area == nil {
-			responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
-			return
-		}
-		err = c.Find(bson.M{
-			"location": bson.M{
-				"$nearSphere": bson.M{
-					"$geometry": bson.M{
-						"Type":        "Point",
-						"coordinates": []float64{alon, alat},
+		if area != nil {
+			//find
+			err := c.Find(bson.M{
+				"location": bson.M{
+					"$nearSphere": bson.M{
+						"$geometry": bson.M{
+							"Type":        "Point",
+							"coordinates": []float64{alon, alat},
+						},
+						"$maxDistance": area.Radius,
 					},
-					"$maxDistance": area.Radius,
 				},
-			},
-		}).All(&msgs)
+			}).All(&msgs)
+			if err != nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
+			log.Println("msgs size", len(msgs))
+		} else {
+			//return some of messages from Ocean
+			err := session.DB("iamhere").C("msgcoean").Find(nil).Limit(10).All(&msgs)
+			if err != nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
+			log.Println("msgcoean msgs size", len(msgs))
+		}
 	} else {
 		var m Message
 		if err := decodeBody(r, &m); err != nil {
@@ -200,7 +212,7 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 				return
 			}
-			log.Println("msgs size", len(msgs))
+			log.Println("msgcoean msgs size", len(msgs))
 		}
 	}
 	//check ExpiryTime and remove none expiry messages
