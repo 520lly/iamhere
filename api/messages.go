@@ -35,6 +35,7 @@ type Message struct {
 	AreaID      string        `json:"areaid" bson:"areaid"`
 	UserID      string        `json:"userid" bson:"userid"`
 	Content     string        `json:"content" bson:"content"`
+	Author      string        `json:"author" bson:"author"`
 	UserDefAddr string        `json:"userdefaddr" bson:"userdefaddr"`
 	ExpiryTime  int64         `json:"expirytime"`
 	Altitude    float64       `json:"altitude"`

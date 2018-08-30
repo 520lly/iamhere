@@ -24,7 +24,7 @@ type User struct {
 	Gender       string        `json:"gender,omitempty"`
 	Comments     string        `json:"comments,omitempty"`
 	APIKey       string        `json:"apikey"`
-	TimeStamp    time.Time
+	TimeStamp    time.Time     `json:"timestamp"`
 }
 
 func (s *Server) handleAccounts(w http.ResponseWriter, r *http.Request) {
