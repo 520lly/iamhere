@@ -1,0 +1,11 @@
+appname: iamhere
+version: 0.0.1
+secret: V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y
+
+db:
+   name:     iamhere
+   user:     admin
+   password: admin
+   host:     localhost
+   port:     27017
+

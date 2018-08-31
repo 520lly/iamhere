@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -36,6 +37,12 @@ type Message struct {
 	Longitude   int           `json:"longitude"`
 	Altitude    int           `json:"altitude"`
 	APIKey      string        `json:"apikey"`
+}
+
+// Handler
+func (s *Server) handleMessagesGetEcho(c echo.Context) error {
+	echoInstance.Logger.Debug()
+	return c.String(http.StatusOK, "Hello, World!")
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {

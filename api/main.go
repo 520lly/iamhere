@@ -6,7 +6,13 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
+
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	lelog "github.com/labstack/gommon/log"
 )
+
+var echoInstance = echo.New()
 
 func main() {
 	var (
@@ -23,6 +29,24 @@ func main() {
 		db: db,
 	}
 	db.SetMode(mgo.Monotonic, true)
+
+	// Echo instance
+	//e := echo.New()
+
+	// Middleware
+	echoInstance.Use(middleware.Logger())
+	echoInstance.Use(middleware.Recover())
+	echoInstance.Logger.SetLevel(lelog.DEBUG)
+
+	// Routes
+	g := echoInstance.Group("/messages")
+	g.GET("/", s.handleMessagesGetEcho)
+	//g.Use(s.handleMessagesGet)
+
+	// Start server
+	echoInstance.Logger.Debug("run echo on 1323 err:")
+	echoInstance.Start(":8080")
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handleMessages)))
 	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleAreas)))
