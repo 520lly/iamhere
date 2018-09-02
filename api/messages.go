@@ -306,12 +306,15 @@ func (s *Server) handleMessagesDelete(w http.ResponseWriter, r *http.Request) {
 	c := session.DB("iamhere").C("messages")
 	p := NewPath(r.URL.Path)
 	if !p.HasID() {
-		respondErr(w, r, http.StatusMethodNotAllowed, "Cannot delete all messages.")
+		respondErr(w, r, http.StatusMethodNotAllowed, "Cannot delete message without Message ID.")
 		return
 	}
 	if err := c.RemoveId(bson.ObjectIdHex(p.ID)); err != nil {
-		respondErr(w, r, http.StatusInternalServerError, "failed to delete message", err)
-		return
+		c := session.DB("iamhere").C("msgcoean")
+		if err := c.RemoveId(bson.ObjectIdHex(p.ID)); err != nil {
+			respondErr(w, r, http.StatusInternalServerError, "failed to delete message. error:", err)
+			return
+		}
 	}
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, nil)
 }
