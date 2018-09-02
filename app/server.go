@@ -32,6 +32,7 @@ func main() {
 
 	// Routes
 	controllers.HandleMessages(e)
+	controllers.HandleAreas(e)
 	// Start server
 	e.Logger.Fatal(e.Start(*addr))
 }

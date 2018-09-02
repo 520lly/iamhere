@@ -1,8 +1,7 @@
 package modules
 
 import (
-	"github.com/520lly/iamhere/app/modules"
-	"time"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Message struct {
@@ -11,11 +10,11 @@ type Message struct {
 	UserID      string        `json:"userid" bson:"userid"`
 	Content     string        `json:"content" bson:"content"`
 	UserDefAddr string        `json:"userdefaddr" bson:"userdefaddr"`
+	Author      string        `json:"author"`
 	ExpiryTime  int64         `json:"expirytime"`
 	Altitude    float64       `json:"altitude"`
-	Location    Info.GeoJson  `bson:"location" json:"location"`
-	APIKey      string        `json:"apikey"`
 	Latitude    float64       `json:"latitude"`
 	Longitude   float64       `json:"longitude"`
-	TimeStamp   time.Time
+	TimeStamp   int64         `json:"timestamp"`
+	Location    GeoJson       `bson:"location" json:"location"`
 }
