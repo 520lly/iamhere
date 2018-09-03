@@ -4,13 +4,16 @@ import (
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
+	//"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func HandleAreas(e *echo.Echo) {
 	g := e.Group("/areas")
+	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("/", CreateNewArea)
-	g.POST("/:id", UpdateArea)
+	g.PUT("/:id", UpdateArea)
 	g.GET("/", GetAreas)
 	g.DELETE("/:id", DeleteAreas)
 }

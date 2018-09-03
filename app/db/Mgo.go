@@ -2,17 +2,19 @@ package db
 
 import (
 	"fmt"
-	//. "github.com/520lly/iamhere/config"
-	//. "github.com/spf13/viper"
+
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
 	"github.com/labstack/gommon/log"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	//"strings"
 )
 
 // Init mgo and the common DAO
+const (
+	QueryOperationAND string = "$and" //and Operation
+	QueryOperationOR  string = "$or"  //or Operation
+)
 
 // database connection
 var DBSession *mgo.Session
@@ -57,6 +59,8 @@ func Init(url, dbname string) {
 	DBCAreaMessages = DBSession.DB(dbname).C("areas_messages")
 	//DBCOceanMessages
 	DBCOceanMessages = DBSession.DB(dbname).C("ocean_messages")
+	//DBCAccounts
+	DBCAccounts = DBSession.DB(dbname).C("accounts")
 	//All areas collection
 	DBCAreas = DBSession.DB(dbname).C("areas")
 
@@ -91,6 +95,10 @@ func DeleteAreaWithID(id bson.ObjectId) error {
 	return deleteItemWithID(DBCAreas, id)
 }
 
+func DeleteAccountWithID(id bson.ObjectId) error {
+	return deleteItemWithID(DBCAccounts, id)
+}
+
 func deleteItemWithID(collection *mgo.Collection, id bson.ObjectId) error {
 	if err := collection.RemoveId(id); err != nil {
 		return err
@@ -117,34 +125,6 @@ func findCollectionWithID(id bson.ObjectId) *mgo.Collection {
 
 }
 
-//func FindAreaWithLocation(lon float64, lat float64) (ret *Area) {
-//    if CheckInRangefloat64(lon, LongitudeMinimum, LongitudeMaximum) && CheckInRangefloat64(lat, LatitudeMinimum, LatitudeMaximum) {
-//        areas := findAllArea()
-//        for _, area := range areas {
-//            var areaMatchs []*Area
-//            if err := DBCAreas.Find(bson.M{
-//                "location": bson.M{
-//                    "$nearSphere": bson.M{
-//                        "$geometry": bson.M{
-//                            "Type":        "Point",
-//                            "coordinates": []float64{lon, lat},
-//                        },
-//                        "$maxDistance": area.Radius,
-//                    },
-//                },
-//            }).All(&areaMatchs); err != nil {
-//                return nil
-//            }
-//            if len(areaMatchs) == 1 && areaMatchs[0].ID == area.ID {
-//                return areaMatchs[0]
-//            }
-//        }
-//    } else {
-//        return nil
-//    }
-//    return nil
-//}
-
 func FindAreas(lon float64, lat float64, rad float64) (ret []*Area) {
 	var areas []*Area
 	if CheckInRangefloat64(lon, LongitudeMinimum, LongitudeMaximum) && CheckInRangefloat64(lat, LatitudeMinimum, LatitudeMaximum) && CheckInRangefloat64(rad, RadiusMinimum, RadiusMaximum) {
@@ -166,6 +146,62 @@ func FindAreas(lon float64, lat float64, rad float64) (ret []*Area) {
 	}
 	return areas
 }
+
+func FindAllUsers() ([]*User, error) {
+	return findAllUsers()
+}
+
+func findAllUsers() ([]*User, error) {
+	var users []*User
+	//get all areas
+	if err := DBCAccounts.Find(nil).All(&users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func FindUsersWithFeild(collection *mgo.Collection, key, value string) ([]*User, error) {
+	var users []*User
+	if err := collection.Find(bson.M{key: value}).All(&users); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	return users, nil
+}
+
+func FindUsersWithPW(collection *mgo.Collection, m map[string]string) ([]*User, error) {
+	var users []*User
+	if err := collection.Find(bson.M{
+		"$and": []bson.M{
+			bson.M{"$or": []bson.M{
+				bson.M{m["key1"]: m["value1"]},
+				bson.M{m["key2"]: m["value2"]},
+				bson.M{m["key3"]: m["value3"]},
+			},
+			},
+			bson.M{m["key4"]: m["value4"]},
+		},
+	}).All(&users); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	return users, nil
+}
+func FindUserWithID(id bson.ObjectId) *User {
+	var user *User
+	if err := findItemWithID(DBCAccounts, id, &user); err != nil {
+		return nil
+	}
+	return user
+}
+
+func findItemWithID(collection *mgo.Collection, id bson.ObjectId, i interface{}) error {
+	if err := collection.FindId(id).One(i); err != nil {
+		return err
+	}
+	return nil
+}
+
 func FindAllArea() ([]*Area, error) {
 	return findAllArea()
 }

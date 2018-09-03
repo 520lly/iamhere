@@ -55,6 +55,8 @@ const (
 	ReasonWrongPw         string = "Wrong Password "
 	ReasonOperationFailed string = "Operation Failure "
 	ReasonNotFound        string = "Not Found"
+	ReasonAlreadyExist    string = "Already Existed"
+	ReasonAuthFailed      string = "Authentication failed "
 )
 const (
 	RandomItemLimit int = 10

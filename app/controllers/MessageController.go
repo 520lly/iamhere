@@ -5,10 +5,12 @@ import (
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func HandleMessages(e *echo.Echo) {
 	g := e.Group("/messages")
+	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("/", CreateNewMessage)
 	g.GET("/", GetMessages)
 	g.DELETE("/:id", DeleteMessages)

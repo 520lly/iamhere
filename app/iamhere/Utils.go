@@ -3,10 +3,12 @@ package iamhere
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"strconv"
 	"time"
 
 	. "github.com/520lly/iamhere/app/modules"
+	"github.com/dgrijalva/jwt-go"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -60,4 +62,37 @@ func ValidateAreaCategory(category int) bool {
 
 func ValidateAreaType(t int) bool {
 	return (t > TypeMinimum && t < TypeMaximum)
+}
+
+func CreateRandomNickname() string {
+	return string(krand(12, 3))
+}
+
+func GetJWTSecretCode() []byte {
+	return []byte("secret")
+}
+
+func CreateNewJWTToken() *jwt.Token {
+	return jwt.New(jwt.SigningMethodHS256)
+}
+
+/**
+* size random size
+* kind 0    // pure number
+       1    // low class alphabet
+       2    // upper class alphabet
+       3    // number、lower, upper class
+*/
+func krand(size int, kind int) []byte {
+	ikind, kinds, result := kind, [][]int{[]int{10, 48}, []int{26, 97}, []int{26, 65}}, make([]byte, size)
+	is_all := kind > 2 || kind < 0
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < size; i++ {
+		if is_all { // random ikind
+			ikind = rand.Intn(3)
+		}
+		scope, base := kinds[ikind][0], kinds[ikind][1]
+		result[i] = uint8(base + rand.Intn(scope))
+	}
+	return result
 }
