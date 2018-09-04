@@ -5,7 +5,7 @@ import (
 
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
-	"github.com/labstack/gommon/log"
+	"github.com/labstack/echo"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -28,11 +28,12 @@ var DBCAreas *mgo.Collection
 
 // sessions
 var DBSessions *mgo.Collection
-var logger log.Logger
+var logger echo.Logger
 
 //Initialization of DAO
-func Init(url, dbname string) {
-	logger.SetLevel(log.DEBUG)
+func Init(url, dbname string, log echo.Logger) {
+	logger = log
+	logger.Debug("Initialization of DB")
 	if url == "" {
 		//TODO load config file
 		url = "localhost"
@@ -170,6 +171,7 @@ func FindUsersWithFeild(collection *mgo.Collection, key, value string) ([]*User,
 }
 
 func FindUsersWithPW(collection *mgo.Collection, m map[string]string) ([]*User, error) {
+	logger.Debug("m:", m)
 	var users []*User
 	if err := collection.Find(bson.M{
 		"$and": []bson.M{
@@ -185,6 +187,7 @@ func FindUsersWithPW(collection *mgo.Collection, m map[string]string) ([]*User, 
 		logger.Error("err:", err.Error())
 		return nil, err
 	}
+	logger.Debug("users:", len(users))
 	return users, nil
 }
 func FindUserWithID(id bson.ObjectId) *User {
@@ -217,9 +220,10 @@ func findAllArea() ([]*Area, error) {
 
 func GetRandomMessages(collection *mgo.Collection, num int) []*Message {
 	var msgs []*Message
-	if err := collection.Find(nil).Limit(num).All(&msgs); err != nil {
+	if err := collection.Pipe([]bson.M{{"$sample": bson.M{"size": num}}}).All(&msgs); err != nil {
 		return nil
 	}
+	logger.Debug("Found msgs:", len(msgs))
 	return msgs
 }
 

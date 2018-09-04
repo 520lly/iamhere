@@ -73,3 +73,9 @@ type Response struct {
 	Data   interface{} `json:"data"`
 	Count  int         `json:"count"`
 }
+
+// Login User
+type LoginUser struct {
+	UserId   string `json:"userid" form:"userid" query:"userid"`
+	Password string `json:"password" form:"password" query:"password"`
+}

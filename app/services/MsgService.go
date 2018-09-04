@@ -128,13 +128,13 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 		//Found up to 10 ocean messages
 		msgs = GetRandomMessages(DBCOceanMessages, RandomItemLimit)
 		if msgs == nil {
-			c.Logger().Debug("Find up to 10 ocean messages failed")
+			c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
 			rsp.Code = RspInternalServerError
-			rsp.Reason = ReasonInsertFailure
+			rsp.Reason = ReasonOperationFailed
 			RespondJ(c, RspInternalServerError, rsp)
 			return nil
 		} else {
-			c.Logger().Debug("Find up to 10 ocean messages Success")
+			c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
 			rsp := &Response{RspOK, ReasonSuccess, msgs, len(msgs)}
 			RespondJ(c, RspOK, rsp)
 			return nil
@@ -155,13 +155,13 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 			//Found up to RandomItemLimit ocean messages
 			msgs = GetSpecifiedLocationMessages(DBCAreaMessages, msg.Longitude, msg.Latitude, area.Radius, RandomItemLimit)
 			if msgs == nil {
-				c.Logger().Debug("Find up to 10 ocean messages failed")
+				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
 				rsp.Code = RspInternalServerError
 				rsp.Reason = ReasonInsertFailure
 				RespondJ(c, RspInternalServerError, rsp)
 				return nil
 			} else {
-				c.Logger().Debug("Find up to 10 ocean messages Success")
+				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
 				RespondJ(c, RspOK, rsp)
 				return nil
 			}
@@ -170,13 +170,15 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 			//Found up to RandomItemLimit ocean messages
 			msgs = GetRandomMessages(DBCOceanMessages, RandomItemLimit)
 			if msgs == nil {
-				c.Logger().Debug("Find up to 10 ocean messages failed")
+				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
 				rsp.Code = RspInternalServerError
 				rsp.Reason = ReasonInsertFailure
 				RespondJ(c, RspInternalServerError, rsp)
 				return nil
 			} else {
-				c.Logger().Debug("Find up to 10 ocean messages Success")
+				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
+				rsp.Data = msgs
+				rsp.Count = len(msgs)
 				RespondJ(c, RspOK, rsp)
 				return nil
 			}

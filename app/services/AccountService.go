@@ -227,7 +227,11 @@ func LoginValidate(c echo.Context, username, password string) error {
 	m["value3"] = username
 	m["key4"] = "password"
 	m["value4"] = password
+	c.Logger().Debug("ValidateAccount :", m)
 	if users, err := FindUsersWithPW(DBCAccounts, m); users != nil && err == nil {
+		//found user registered
+		c.Logger().Debug("Found users:", JsonToString(users))
+		return nil
 	}
-	return nil
+	return NewError(ReasonNotFound)
 }
