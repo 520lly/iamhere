@@ -16,7 +16,7 @@ func HandleAccounts(e *echo.Echo) {
 	g.PUT("/:id", UpdateAccount)
 	g.POST("/login", ValidateAccount)
 	g.GET("/login/", ValidateAccount)
-	g.GET("", GetAccounts)
+	g.GET("/", GetAccounts)
 	g.DELETE("/:id", DeleteAccounts)
 }
 
@@ -135,7 +135,7 @@ func ValidateAccount(c echo.Context) error {
 	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(Config.ApiConfig.Secret))
 	if err != nil {
 		return err
 	}

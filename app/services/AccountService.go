@@ -62,17 +62,21 @@ func registerUser(c echo.Context, user *User) error {
 
 func isUserRegistered(c echo.Context, user *User) (bool, error) {
 	var usersFound []*User
-	if usersFound, err := FindUsersWithFeild(DBCAccounts, "email", user.Email); err == nil {
-		if len(usersFound) != 0 {
-			c.Logger().Debug("Found users size: ", len(usersFound))
-			return true, err
-		}
-	} else if usersFound, err := FindUsersWithFeild(DBCAccounts, "phonenumber", user.PhoneNumber); err == nil {
-		if len(usersFound) != 0 {
-			c.Logger().Debug("Found users size: ", len(usersFound))
-			return true, err
-		}
-	} else if usersFound, err := FindUsersWithFeild(DBCAccounts, "associatedId", user.AssociatedId); err == nil {
+	m := make(map[string]string)
+	if len(user.AssociatedId) != 0 {
+		m["key1"] = "associatedId"
+		m["value1"] = user.AssociatedId
+	}
+	if len(user.PhoneNumber) != 0 {
+		m["key2"] = "phonenumber"
+		m["value2"] = user.PhoneNumber
+	}
+	if len(user.Email) != 0 {
+		m["key3"] = "email"
+		m["value3"] = user.Email
+	}
+	c.Logger().Debug("map side:", len(m))
+	if usersFound, err := FindUsersWithFeild(DBCAccounts, m); err == nil {
 		if len(usersFound) != 0 {
 			c.Logger().Debug("Found users size: ", len(usersFound))
 			return true, err

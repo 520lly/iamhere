@@ -33,7 +33,7 @@ var logger echo.Logger
 //Initialization of DAO
 func Init(url, dbname string, log echo.Logger) {
 	logger = log
-	logger.Debug("Initialization of DB")
+	logger.Debug("Initialization of DB. url, ", url, ", dbname, ", dbname)
 	if url == "" {
 		//TODO load config file
 		url = "localhost"
@@ -161,12 +161,20 @@ func findAllUsers() ([]*User, error) {
 	return users, nil
 }
 
-func FindUsersWithFeild(collection *mgo.Collection, key, value string) ([]*User, error) {
+func FindUsersWithFeild(collection *mgo.Collection, m map[string]string) ([]*User, error) {
+	logger.Debug("m:", m)
 	var users []*User
-	if err := collection.Find(bson.M{key: value}).All(&users); err != nil {
+	if err := collection.Find(
+		bson.M{"$or": []bson.M{
+			bson.M{m["key1"]: m["value1"]},
+			bson.M{m["key2"]: m["value2"]},
+			bson.M{m["key3"]: m["value3"]},
+		},
+		}).All(&users); err != nil {
 		logger.Error("err:", err.Error())
 		return nil, err
 	}
+	logger.Debug("users:", len(users))
 	return users, nil
 }
 

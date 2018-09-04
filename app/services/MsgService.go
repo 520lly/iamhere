@@ -126,15 +126,15 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	if debug {
 		//Found up to 10 ocean messages
-		msgs = GetRandomMessages(DBCOceanMessages, RandomItemLimit)
+		msgs = GetRandomMessages(DBCOceanMessages, Config.ApiConfig.RandomItemLimit)
 		if msgs == nil {
-			c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
+			c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages failed")
 			rsp.Code = RspInternalServerError
 			rsp.Reason = ReasonOperationFailed
 			RespondJ(c, RspInternalServerError, rsp)
 			return nil
 		} else {
-			c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
+			c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
 			rsp := &Response{RspOK, ReasonSuccess, msgs, len(msgs)}
 			RespondJ(c, RspOK, rsp)
 			return nil
@@ -152,31 +152,31 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 
 		if area := FindAreaWithLocation(c, msg.Longitude, msg.Latitude); area != nil {
 			//this message belong to a specific area
-			//Found up to RandomItemLimit ocean messages
-			msgs = GetSpecifiedLocationMessages(DBCAreaMessages, msg.Longitude, msg.Latitude, area.Radius, RandomItemLimit)
+			//Found up to random item limit ocean messages
+			msgs = GetSpecifiedLocationMessages(DBCAreaMessages, msg.Longitude, msg.Latitude, area.Radius, Config.ApiConfig.RandomItemLimit)
 			if msgs == nil {
-				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
+				c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages failed")
 				rsp.Code = RspInternalServerError
 				rsp.Reason = ReasonInsertFailure
 				RespondJ(c, RspInternalServerError, rsp)
 				return nil
 			} else {
-				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
+				c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
 				RespondJ(c, RspOK, rsp)
 				return nil
 			}
 
 		} else {
-			//Found up to RandomItemLimit ocean messages
-			msgs = GetRandomMessages(DBCOceanMessages, RandomItemLimit)
+			//Found up to random item limit ocean messages
+			msgs = GetRandomMessages(DBCOceanMessages, Config.ApiConfig.RandomItemLimit)
 			if msgs == nil {
-				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages failed")
+				c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages failed")
 				rsp.Code = RspInternalServerError
 				rsp.Reason = ReasonInsertFailure
 				RespondJ(c, RspInternalServerError, rsp)
 				return nil
 			} else {
-				c.Logger().Debug("Find up to ", RandomItemLimit, " ocean messages Success")
+				c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
 				rsp.Data = msgs
 				rsp.Count = len(msgs)
 				RespondJ(c, RspOK, rsp)
@@ -184,6 +184,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 			}
 		}
 	}
+	//TODO Implemente paging
 	return nil
 }
 

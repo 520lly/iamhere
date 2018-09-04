@@ -6,9 +6,9 @@ import (
 
 type User struct {
 	ID           bson.ObjectId `json:"id" bson:"_id"`
-	AssociatedId string        `json:"associatedId,omitempty" bson:"associatedId"`
+	AssociatedId string        `json:"associatedId" bson:"associatedId"`
 	PhoneNumber  string        `json:"phonenumber" bson:"phonenumber"`
-	Email        string        `json:"email,omitempty" bson:"email"`
+	Email        string        `json:"email" bson:"email"`
 	NickName     string        `json:"nickname,omitempty"`
 	FirstName    string        `json:"firstname,omitempty"`
 	LastName     string        `json:"lastname,omitempty"`

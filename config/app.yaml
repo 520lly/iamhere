@@ -1,11 +1,24 @@
-appname: iamhere
-version: 0.0.1
-secret: V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y
+appname: "iamhere"
+version: "0.0.1"
 
-db:
-   name:     iamhere
-   user:     admin
-   password: admin
-   host:     localhost
-   port:     27017
+appconfig:
+    host:           "localhost"
+    port:           "8080"
+    loggerPrefix:   "iamhere"
+    enableDebug:    true
+    enableSSL:      false
+    enableDumpLog:  true
+    logPath:        "/var/log/iamhere/"
+
+apiconfig:
+    secret:         "V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y"
+    randomItemLimit: 10
+    bodySizeLimit:  "1K"
+
+database:
+    name:     "iamhere"
+    user:     "wangjianging"
+    password: "admin"
+    host:     "localhost"
+    port:     "27017"
 
