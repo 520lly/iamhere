@@ -164,7 +164,7 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 			log.Println("msgs size", len(msgs))
 		} else {
 			//return some of messages from Ocean
-			err := session.DB("iamhere").C("msgcoean").Find(nil).Limit(10).All(&msgs)
+			err := session.DB("iamhere").C("msgcoean").Find(nil).All(&msgs)
 			if err != nil {
 				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 				return
@@ -207,7 +207,7 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 			log.Println("msgs size", len(msgs))
 		} else {
 			//return some of messages from Ocean
-			err := session.DB("iamhere").C("msgcoean").Find(nil).Limit(10).All(&msgs)
+			err := session.DB("iamhere").C("msgcoean").Find(nil).All(&msgs)
 			if err != nil {
 				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 				return

@@ -16,7 +16,9 @@ data='{"areaid":"test","userid":"wang","content":"This is a test messages","user
 #curl --data "$data" -X POST http://$IP:8080/messages/?key=abc123
 ###curl --data '{"title":"test","options":["one","two","three"]}' -X POST http://$IP:8080/polls/?key=abc123
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
-#curl -X GET "http://$IP:8080/messages/?key=abc123&&debug=1"
+#curl --data '{"longitude":39, "latitude":123}' -X GET "http://$IP:8080/messages/?key=abc123&&debug=1" | jq
+curl --data '{"longitude":121, "latitude":23}' -X GET "http://$IP:8080/messages/?key=abc123" | jq
+exit
 #curl --data '{"name":"雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"dad雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"2323雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
@@ -27,7 +29,7 @@ data='{"areaid":"test","userid":"wang","content":"This is a test messages","user
 #curl --data '{"nickname":"Mhajd","associatedId":"wechat_djakdjakdj","password":"testtttt","email":"jackaing.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/${1:-""}/?key=abc123"
 #curl -X GET "http://$IP:8080/accounts/?key=abc123&debug=1"
 #curl --data '{"nickname":"hahahah","password":"testtttt","email":"jacking.wang.wjq@gmail.com","firstname":"jianqing","lastname":"wang","phonenumber":"13167016112","birthday":"19990919","gender":"male"}' -X POST "http://$IP:8080/accounts/5b7a4a9ec2217bf5e4c3fd2a/?key=abc123"
-#curl -X GET "http://$IP:8079/areas/?key=abc123&debug=1"
+curl -X GET "http://$IP:8080/messages/?key=abc123&debug=1" | jq
 
 curl -d '{"latitude":39.7039399637,"longitude":121.1754884604,"altitude":0}' -X GET "http://$IP:8080/messages/?key=abc123" | jq
 curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123 | jq
