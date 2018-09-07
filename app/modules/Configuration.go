@@ -39,6 +39,15 @@ type Configuration struct {
 		}
 	}
 
+	WebConfig struct {
+		Prefix  string
+		Version string
+
+		Admin struct {
+			Group string
+		}
+	}
+
 	Database struct {
 		Name     string
 		User     string

@@ -1,12 +1,12 @@
 package main
 
 import (
-	//"flag"
-	//"io/ioutil"
+	//"net/http"
 	"os"
 	"time"
 
-	"github.com/520lly/iamhere/app/controllers/api"
+	. "github.com/520lly/iamhere/app/controllers/api"
+	. "github.com/520lly/iamhere/app/controllers/web"
 	"github.com/520lly/iamhere/app/db"
 	. "github.com/520lly/iamhere/app/iamhere"
 	"github.com/labstack/echo"
@@ -21,6 +21,8 @@ type (
 )
 
 func main() {
+	// Hosts
+	hosts := map[string]*Host{}
 	//-----
 	// API
 	//-----
@@ -62,16 +64,43 @@ func main() {
 	//api.Pre(middleware.HTTPSRedirect())
 
 	// Routes
-	controllers.HandleMessages(api)
-	controllers.HandleAreas(api)
-	controllers.HandleAccounts(api)
-	controllers.HandleTrail(api)
+	HandleMessages(api)
+	HandleAreas(api)
+	HandleAccounts(api)
+	HandleTrail(api)
+
+	hosts[Addr] = &Host{api}
 
 	//-----
 	// WEB
 	//-----
-	//TBD
+	site := echo.New()
+	// Middleware
+	site.Use(middleware.Logger())
+	site.Use(middleware.Recover())
+	hosts["site."+Addr] = &Host{site}
 
+	HandleWebAdmin(site)
+
+	// Server
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	e.Any("/*", func(c echo.Context) (err error) {
+		req := c.Request()
+		res := c.Response()
+		host := hosts[req.Host]
+
+		if host == nil {
+			err = echo.ErrNotFound
+		} else {
+			host.Echo.ServeHTTP(res, req)
+		}
+
+		return
+	})
 	// Start server
-	api.Logger.Fatal(api.Start(Addr))
+	//api.Logger.Fatal(api.Start(Addr))
+	e.Logger.Fatal(e.Start(Addr))
 }

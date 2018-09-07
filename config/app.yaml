@@ -7,7 +7,7 @@ appconfig:
    loggerPrefix:   "iamhere"
    enableDebug:    true
    enableSSL:      false
-   enableDumpLog:  true
+   enableDumpLog:  false
    logPath:        "/var/log/iamhere/"
 
 apiconfig:
@@ -24,6 +24,12 @@ apiconfig:
        group:      "/areas"
    trails: 
        group:      "/trails"
+
+webconfig:
+   prefix:         "/web"
+   version:        "/v1"
+   admin:
+       group:      "/admin"
 
 database:
    name:     "iamhere"

@@ -1,4 +1,4 @@
-package controllers
+package controllers_api
 
 import (
 	. "github.com/onsi/ginkgo"
