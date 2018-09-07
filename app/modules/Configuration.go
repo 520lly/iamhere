@@ -21,7 +21,8 @@ type Configuration struct {
 		Secret          string
 		RandomItemLimit int
 		BodySizeLimit   string
-		Accounts        struct {
+
+		Accounts struct {
 			Group string
 		}
 
