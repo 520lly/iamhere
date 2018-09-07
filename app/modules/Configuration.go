@@ -16,9 +16,26 @@ type Configuration struct {
 	}
 
 	ApiConfig struct {
+		Prefix          string
+		Version         string
 		Secret          string
 		RandomItemLimit int
 		BodySizeLimit   string
+		Accounts        struct {
+			Group string
+		}
+
+		Messages struct {
+			Group string
+		}
+
+		Areas struct {
+			Group string
+		}
+
+		Trails struct {
+			Group string
+		}
 	}
 
 	Database struct {

@@ -228,8 +228,15 @@ func findAllArea() ([]*Area, error) {
 
 func GetRandomMessages(collection *mgo.Collection, num int) []*Message {
 	var msgs []*Message
-	if err := collection.Pipe([]bson.M{{"$sample": bson.M{"size": num}}}).All(&msgs); err != nil {
-		return nil
+	if num <= 0 {
+		//don't use limit and return all Message
+		if err := collection.Find(nil).All(&msgs); err != nil {
+			return nil
+		}
+	} else {
+		if err := collection.Pipe([]bson.M{{"$sample": bson.M{"size": num}}}).All(&msgs); err != nil {
+			return nil
+		}
 	}
 	logger.Debug("Found msgs:", len(msgs))
 	return msgs

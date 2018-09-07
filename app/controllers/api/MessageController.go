@@ -9,7 +9,8 @@ import (
 )
 
 func HandleMessages(e *echo.Echo) {
-	g := e.Group("/messages")
+	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Messages.Group
+	g := e.Group(urlGroup)
 	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("", CreateNewMessage)
 	g.GET("/", GetMessages)

@@ -10,7 +10,8 @@ import (
 )
 
 func HandleAreas(e *echo.Echo) {
-	g := e.Group("/areas")
+	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Areas.Group
+	g := e.Group(urlGroup)
 	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("/", CreateNewArea)
 	g.PUT("/:id", UpdateArea)

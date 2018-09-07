@@ -2,23 +2,37 @@ appname: "iamhere"
 version: "0.0.1"
 
 appconfig:
-    host:           "localhost"
-    port:           "8080"
-    loggerPrefix:   "iamhere"
-    enableDebug:    true
-    enableSSL:      false
-    enableDumpLog:  true
-    logPath:        "/var/log/iamhere/"
+   host:           "localhost"
+   port:           "8080"
+   loggerPrefix:   "iamhere"
+   enableDebug:    true
+   enableSSL:      false
+   enableDumpLog:  true
+   logPath:        "/var/log/iamhere/"
 
 apiconfig:
-    secret:         "V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y"
-    randomItemLimit: 10
-    bodySizeLimit:  "1K"
+   prefix:         "/api"
+   version:        "/v1"
+   secret:         "V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y"
+   randomItemLimit: 10
+   bodySizeLimit:  "1K"
+
+   accounts:
+      group:      "/accounts"
+
+   messages:
+      group:      "/messages"
+
+   areas:
+      group:      "/areas"
+
+   trails: 
+   group:         "/trails"
 
 database:
-    name:     "iamhere"
-    user:     "wangjianging"
-    password: "admin"
-    host:     "localhost"
-    port:     "27017"
+   name:     "iamhere"
+   user:     "wangjianging"
+   password: "admin"
+   host:     "localhost"
+   port:     "27017"
 

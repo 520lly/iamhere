@@ -11,7 +11,8 @@ import (
 )
 
 func HandleAccounts(e *echo.Echo) {
-	g := e.Group("/accounts")
+	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Accounts.Group
+	g := e.Group(urlGroup)
 	g.POST("/register", CreateNewAccount)
 	g.PUT("/:id", UpdateAccount)
 	g.POST("/login", ValidateAccount)
