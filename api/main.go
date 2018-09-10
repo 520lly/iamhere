@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"gopkg.in/mgo.v2"
 	"log"
@@ -27,8 +28,28 @@ func main() {
 	mux.HandleFunc("/messages/", withCORS(withAPIKey(s.handleMessages)))
 	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleAreas)))
 	mux.HandleFunc("/accounts/", withCORS(withAPIKey(s.handleAccounts)))
+
+	cfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+	srv := &http.Server{
+		Addr:         ":443",
+		Handler:      mux,
+		TLSConfig:    cfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
+
+	log.Println("Starting https web server on: :443")
+	go srv.ListenAndServeTLS("../assets/certs/server.crt", "../assets/certs/server.key")
 	log.Println("Starting web server on", *addr)
-	//go http.ListenAndServeTLS(":8082", "../assets/certs/server.crt", "../assets/certs/server.key", mux)
 	http.ListenAndServe(":8080", mux)
 	log.Println("Stopping...")
 }
