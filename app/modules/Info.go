@@ -69,7 +69,7 @@ type GeoJson struct {
 
 type Response struct {
 	Code   int         `json:"code"`
-	Reason string      `json:"reasone"`
+	Reason string      `json:"reason"`
 	Data   interface{} `json:"data"`
 	Count  int         `json:"count"`
 }

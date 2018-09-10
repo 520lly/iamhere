@@ -77,6 +77,9 @@ func main() {
 	site := echo.New()
 	// Middleware
 	site.Use(middleware.Logger())
+	if Config.AppConfig.EnableDebug {
+		site.Logger.SetLevel(log.DEBUG)
+	}
 	site.Use(middleware.Recover())
 	hosts["site."+Addr] = &Host{site}
 
@@ -85,6 +88,9 @@ func main() {
 	// Server
 	e := echo.New()
 	e.Use(middleware.Logger())
+	if Config.AppConfig.EnableDebug {
+		e.Logger.SetLevel(log.DEBUG)
+	}
 	e.Use(middleware.Recover())
 
 	e.Any("/*", func(c echo.Context) (err error) {
@@ -96,8 +102,8 @@ func main() {
 			err = echo.ErrNotFound
 		} else {
 			host.Echo.ServeHTTP(res, req)
+			e.Logger.Debug("Host found")
 		}
-
 		return
 	})
 	// Start server

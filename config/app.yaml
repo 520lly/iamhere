@@ -26,10 +26,10 @@ apiconfig:
        group:      "/trails"
 
 webconfig:
-   prefix:         "/web"
-   version:        "/v1"
+   prefix:         ""
+   version:        ""
    admin:
-       group:      "/admin"
+       group:      ""
 
 database:
    name:     "iamhere"

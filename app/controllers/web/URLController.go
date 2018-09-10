@@ -1,30 +1,27 @@
 package controllers_web
 
 import (
+	"github.com/labstack/echo"
 	"html/template"
-	"log"
-	"net/http"
-)
 
-type User struct {
-	UserName string
-}
+	. "github.com/520lly/iamhere/app/modules"
+)
 
 type URLController struct {
 }
 
-func (this *URLController) IndexView(w http.ResponseWriter, r *http.Request, user string) {
+func (this *URLController) IndexView(c echo.Context, user string) {
 	t, err := template.ParseFiles("template/html/index.html")
 	if err != nil {
-		log.Println(err)
+		c.Logger().Error(err)
 	}
-	t.Execute(w, &User{user})
+	t.Execute(c.Response().Writer, &AdminUser{user})
 }
 
-func (this *URLController) LoginView(w http.ResponseWriter, r *http.Request) {
+func (this *URLController) LoginView(c echo.Context) {
 	t, err := template.ParseFiles("template/html/login.html")
 	if err != nil {
-		log.Println(err)
+		c.Logger().Error(err)
 	}
-	t.Execute(w, nil)
+	t.Execute(c.Response().Writer, nil)
 }

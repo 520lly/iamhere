@@ -18,3 +18,7 @@ type User struct {
 	Comments     string        `json:"comments,omitempty"`
 	TimeStamp    int64         `json:"timestamp"`
 }
+
+type AdminUser struct {
+	UserName string
+}
