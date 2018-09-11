@@ -48,7 +48,8 @@ func main() {
 	}
 
 	log.Println("Starting https web server on: :443")
-	go srv.ListenAndServeTLS("/etc/ssl/iamhere/server.crt", "/etc/ssl/iamhere/server.key")
+	//go srv.ListenAndServeTLS("/etc/ssl/iamhere/server.crt", "/etc/ssl/iamhere/server.key")
+	go srv.ListenAndServeTLS("../assets/214987401110045.pem", "../assets/214987401110045.key")
 	log.Println("Starting web server on", *addr)
 	http.ListenAndServe(":8080", mux)
 	log.Println("Stopping...")
