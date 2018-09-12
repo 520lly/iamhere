@@ -4,9 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
+	"time"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 func main() {
@@ -29,26 +33,61 @@ func main() {
 	mux.HandleFunc("/areas/", withCORS(withAPIKey(s.handleAreas)))
 	mux.HandleFunc("/accounts/", withCORS(withAPIKey(s.handleAccounts)))
 
-	cfg := &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-		},
-	}
-	srv := &http.Server{
-		Addr:         ":443",
-		Handler:      mux,
-		TLSConfig:    cfg,
-		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	var m *autocert.Manager
+	var httpsSrv *http.Server
+
+	hostPolicy := func(ctx context.Context, host string) error {
+		// Note: change to your real host
+		allowedHost := "www.historystest.com"
+		if host == allowedHost {
+			return nil
+		}
+		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 	}
 
-	log.Println("Starting https web server on: :443")
-	go srv.ListenAndServeTLS("/etc/ssl/iamhere/server.crt", "/etc/ssl/iamhere/server.key")
+	dataDir := "."
+	m = &autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: hostPolicy,
+		Cache:      autocert.DirCache(dataDir),
+	}
+
+	httpsSrv = &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Handler:      mux,
+	}
+	httpsSrv.Addr = ":443"
+	httpsSrv.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
+
+	go func() {
+		log.Println("Starting HTTPS server on %s\n", httpsSrv.Addr)
+		err := httpsSrv.ListenAndServeTLS("", "")
+		if err != nil {
+			log.Fatalf("httpsSrv.ListendAndServeTLS() failed with %s", err)
+		}
+	}()
+	//cfg := &tls.Config{
+	//    MinVersion:               tls.VersionTLS12,
+	//    CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+	//    PreferServerCipherSuites: true,
+	//    CipherSuites: []uint16{
+	//        tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	//        tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+	//        tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+	//        tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+	//    },
+	//}
+	//srv := &http.Server{
+	//    Addr:         ":443",
+	//    Handler:      mux,
+	//    TLSConfig:    cfg,
+	//    TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	//}
+
+	//log.Println("Starting https web server on: :443")
+	//go srv.ListenAndServeTLS("/etc/ssl/iamhere/server.crt", "/etc/ssl/iamhere/server.key")
 	//go srv.ListenAndServeTLS("../assets/214987401110045.pem", "../assets/214987401110045.key")
 	log.Println("Starting web server on", *addr)
 	http.ListenAndServe(":8080", mux)
