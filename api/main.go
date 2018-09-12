@@ -45,7 +45,7 @@ func main() {
 		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 	}
 
-	dataDir := "."
+	dataDir := "/home/jaycee/var/www/cache"
 	m = &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: hostPolicy,
