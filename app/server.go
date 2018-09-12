@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 type (
@@ -71,6 +72,16 @@ func main() {
 	// WEB
 	//-----
 	//TBD
+	e := echo.New()
+	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
+	// Cache certificates
+	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
+	e.Logger.Fatal(e.StartAutoTLS(":443"))
+	controllers.HandleMessages(e)
+	controllers.HandleAreas(e)
+	controllers.HandleAccounts(e)
+	controllers.HandleTrail(e)
+	go e.StartAutoTLS(":443")
 
 	// Start server
 	api.Logger.Fatal(api.Start(Addr))
