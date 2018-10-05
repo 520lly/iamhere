@@ -3,7 +3,7 @@ version: "0.0.1"
 
 appconfig:
    host:           "localhost"
-   port:           "8090"
+   port:           "8080"
    loggerPrefix:   "iamhere"
    enableDebug:    true
    enableSSL:      false

@@ -12,7 +12,7 @@ var logger echo.Logger
 
 func loadConfigFile() error {
 	viper.SetConfigName("app")
-	viper.AddConfigPath("../config")
+	viper.AddConfigPath("/etc/iamhere/config")
 	if err := viper.ReadInConfig(); err != nil {
 		logger.Error("Error reading config file, %s", err)
 		return err
