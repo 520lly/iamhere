@@ -74,16 +74,23 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	c := session.DB("iamhere").C("messages")
 	var q *mgo.Query
 	p := NewPath(r.URL.Path)
+	var msgs []*Message
 	if p.HasID() {
 		// get specific messages
-		log.Println("ID ", p.HasID())
-		q = c.FindId(bson.ObjectIdHex(p.ID))
+		log.Println("ID ", p.ID)
+		var err error = nil
+		if err = c.FindId(bson.ObjectIdHex(p.ID)).All(&msgs); err != nil {
+			log.Println("error ", string(err.Error()))
+			responseHandleMessage(w, r, RspOK, err.Error(), nil)
+			return
+		}
+		responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+		return
 	} else {
 		// get all messages
 		q = c.Find(nil)
 	}
 	//get all list for debugging
-	var msgs []*Message
 	debug := r.URL.Query().Get("debug")
 	log.Println("debug=", debug)
 	if len(debug) != 0 {
