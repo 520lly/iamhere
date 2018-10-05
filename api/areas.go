@@ -33,8 +33,11 @@ const (
 
 const (
 	CategoryMinimum int = -1               //Category Minimum
-	CategorySystem  int = 0                //defined by system
-	CategoryUser    int = 1                //defined by user
+	CategoryFixed   int = 1                //defined by system for fixed areas
+	CategoryOcean   int = 2                //defined by system for ocean
+	CategoryIsland  int = 4                //defined by system for island
+	CategoryCloud   int = 8                //defined by system for cloud
+	CategoryUser    int = 16               //defined by user
 	CategoryMaximum int = CategoryUser + 1 //Category Maximum
 )
 
@@ -174,6 +177,11 @@ func (s *Server) handleAreasGet(w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		}).All(&areas)
+	} else {
+		if err := q.All(&areas); err != nil {
+			responseHandleAreas(w, r, http.StatusNotFound, ReasonSuccess, nil)
+			return
+		}
 	}
 	areaType := r.URL.Query().Get("type")
 	if len(areaType) != 0 {
@@ -206,8 +214,46 @@ func (s *Server) handleAreasGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for i := len(areas) - 1; i >= 0; i-- {
-			if areas[i].Category != ac {
-				areas = append(areas[:i], areas[i+1:]...)
+			log.Println("areas[i].Category is ", areas[i].Category)
+			if ac&1 == 0 { //request category excluded CategoryFixed
+				if areas[i].Category == CategoryFixed {
+					areas = append(areas[:i], areas[i+1:]...)
+					if len(areas) <= 0 {
+						break
+					}
+				}
+			}
+			if ac&(1<<1) == 0 { //request category excluded CategoryOcean
+				if areas[i].Category == CategoryOcean {
+					areas = append(areas[:i], areas[i+1:]...)
+					if len(areas) <= 0 {
+						break
+					}
+				}
+			}
+			if ac&(1<<2) == 0 { //request category excluded CategoryIsland
+				if areas[i].Category == CategoryIsland {
+					areas = append(areas[:i], areas[i+1:]...)
+					if len(areas) <= 0 {
+						break
+					}
+				}
+			}
+			if ac&(1<<3) == 0 { //request category excluded CategoryCloud
+				if areas[i].Category == CategoryCloud {
+					areas = append(areas[:i], areas[i+1:]...)
+					if len(areas) <= 0 {
+						break
+					}
+				}
+			}
+			if ac&(1<<4) == 0 { //request category excluded CategoryUser
+				if areas[i].Category == CategoryUser {
+					areas = append(areas[:i], areas[i+1:]...)
+					if len(areas) <= 0 {
+						break
+					}
+				}
 			}
 		}
 	}

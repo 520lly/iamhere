@@ -44,7 +44,8 @@ type Message struct {
 	Latitude    float64       `json:"latitude"`
 	Longitude   float64       `json:"longitude"`
 	TimeStamp   int64         `json:"timestamp"`
-	//TimeStamp   time.Time     `json:"timestamp"`
+	LikeCount   int32         `json:"likecount"`
+	Recommend   bool          `json:"recommend"`
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {

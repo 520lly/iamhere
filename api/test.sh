@@ -18,10 +18,12 @@ data='{"areaid":"test","userid":"wang","content":"This is a test messages","user
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
 #curl --data '{"longitude":39, "latitude":123}' -X GET "http://$IP:8080/messages/?key=abc123&&debug=1" | jq
 #curl -X GET "http://$IP:8080/messages/?key=abc123&debug=1"
-curl -X GET "http://$IP:8080/messages/${1:-""}/?key=abc123"
+#curl -X GET "http://$IP:8080/areas/?key=abc123&debug=0"
+curl -X GET "http://$IP:8080/areas/?key=abc123&category=16"
+#curl --data '{"name":"雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":16,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
+#curl -X GET "http://$IP:8080/messages/${1:-""}/?key=abc123"
 exit
 curl --data '{"longitude":121, "latitude":23}' -X GET "http://$IP:8080/messages/?key=abc123" | jq
-#curl --data '{"name":"雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"dad雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"2323雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl --data '{"name":"11雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":1,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
