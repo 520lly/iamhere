@@ -2,7 +2,8 @@ package main
 
 import (
 	//"flag"
-	//"io/ioutil"
+   //"io/ioutil"
+   //"crypto/tls"
 	"os"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
-	"golang.org/x/crypto/acme/autocert"
+	//"golang.org/x/crypto/acme/autocert"
 )
 
 type (
@@ -72,16 +73,17 @@ func main() {
 	// WEB
 	//-----
 	//TBD
+
 	e := echo.New()
-	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
+	//e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
 	// Cache certificates
-	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
-	e.Logger.Fatal(e.StartAutoTLS(":443"))
+	//e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
 	controllers.HandleMessages(e)
 	controllers.HandleAreas(e)
 	controllers.HandleAccounts(e)
 	controllers.HandleTrail(e)
-	go e.StartAutoTLS(":443")
+	//go e.StartAutoTLS(":443")
+   go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
 
 	// Start server
 	api.Logger.Fatal(api.Start(Addr))

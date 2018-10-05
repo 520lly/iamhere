@@ -26,8 +26,11 @@ const (
 
 const (
 	CategoryMinimum int = -1               //Category Minimum
-	CategorySystem  int = 0                //defined by system
-	CategoryUser    int = 1                //defined by user
+	CategoryFixed   int = 1                //defined by system for fixed areas
+	CategoryOcean   int = 2                //defined by system for ocean
+	CategoryIsland  int = 4                //defined by system for island
+	CategoryCloud   int = 8                //defined by system for cloud
+	CategoryUser    int = 16                //defined by user
 	CategoryMaximum int = CategoryUser + 1 //Category Maximum
 )
 

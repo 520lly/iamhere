@@ -17,4 +17,6 @@ type Message struct {
 	Longitude   float64       `json:"longitude"`
 	TimeStamp   int64         `json:"timestamp"`
 	Location    GeoJson       `bson:"location" json:"location"`
+	LikeCount   string        `json:"likecount"`
+	Recommend   string        `json:"recommend"`
 }
