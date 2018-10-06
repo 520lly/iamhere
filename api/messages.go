@@ -57,6 +57,10 @@ func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 		log.Println("POST")
 		s.handleMessagesPost(w, r)
 		return
+	case "PUT":
+		log.Println("PUT")
+		s.handleMessagesPut(w, r)
+		return
 	case "DELETE":
 		s.handleMessagesDelete(w, r)
 		return
@@ -103,6 +107,16 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 		responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 		return
 	}
+	areaid := r.URL.Query().Get("areaid")
+	log.Println("areaid=", areaid)
+	if len(areaid) != 0 {
+		err := c.Find(bson.M{"areaid": areaid}).All(&msgs)
+		log.Println("msgs size", len(msgs))
+		if err == nil {
+			responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+			return
+		}
+	}
 	msgLon := r.URL.Query().Get("longitude")
 	msgLat := r.URL.Query().Get("latitude")
 	msgAlt := r.URL.Query().Get("altitude")
@@ -131,24 +145,6 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
 			return
 		}
-		//aalt, err := strconv.ParseFloat(msgAlt, 64)
-		//if err != nil {
-		//    respondErr(w, r, http.StatusBadRequest, err)
-		//    return
-		//}
-		//if !checkInRangefloat64(aalt, AltitudeMinium, AltitudeMaximum) {
-		//    responseHandleMessage(w, r, http.StatusBadRequest, "altitude is out of range", nil)
-		//    return
-		//}
-		//arad, err := strconv.ParseFloat(msgRad, 64)
-		//if err != nil {
-		//    respondErr(w, r, http.StatusBadRequest, err)
-		//    return
-		//}
-		//if !checkInRangefloat64(alat, LatitudeMinimum, LatitudeMaximum) {
-		//    responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
-		//    return
-		//}
 		log.Println("msg longitude: ", alon, "latitude: ", alat)
 		//find
 		area := s.findAreaWithLocation(alon, alat)
@@ -230,6 +226,61 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	log.Println("msgs size", len(msgs))
+	responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+}
+
+func (s *Server) handleMessagesPut(w http.ResponseWriter, r *http.Request) {
+	log.Println("handleMessagesPut")
+	session := s.db.Copy()
+	defer session.Close()
+	c := session.DB("iamhere").C("messages")
+	p := NewPath(r.URL.Path)
+	if !p.HasID() {
+		respondErr(w, r, http.StatusBadRequest, "failed to update without msg id", nil)
+		return
+	}
+	log.Println("ID=", p.ID)
+	likecount := r.URL.Query().Get("likecount")
+	log.Println("likecount=", likecount)
+	if len(likecount) != 0 {
+		lc, err := strconv.ParseInt(likecount, 0, 32)
+		if err != nil {
+			responseHandleMessage(w, r, RspFailed, ReasonOperationFailed, nil)
+			return
+		}
+		log.Println("likecount=", lc)
+		colQuerier := bson.M{"_id": bson.ObjectIdHex(p.ID)}
+		change := bson.M{"$set": bson.M{"likecount": lc, "timestamp": time.Now().Unix()}}
+		err = c.Update(colQuerier, change)
+		if err != nil {
+			log.Println("error=", err.Error())
+			responseHandleMessage(w, r, RspFailed, ReasonOperationFailed, nil)
+			return
+		}
+	}
+	recommend := r.URL.Query().Get("recommend")
+	log.Println("recommend=", recommend)
+	if len(recommend) != 0 {
+		rc, err := strconv.ParseBool(recommend)
+		if err != nil {
+			responseHandleMessage(w, r, RspFailed, ReasonOperationFailed, nil)
+			return
+		}
+		log.Println("recommend=", rc)
+		colQuerier := bson.M{"_id": bson.ObjectIdHex(p.ID)}
+		change := bson.M{"$set": bson.M{"recommend": rc, "timestamp": time.Now().Unix()}}
+		err = c.Update(colQuerier, change)
+		if err != nil {
+			responseHandleMessage(w, r, RspFailed, ReasonOperationFailed, nil)
+			return
+		}
+	}
+	var msgs []*Message
+	if err := c.FindId(bson.ObjectIdHex(p.ID)).All(&msgs); err != nil {
+		log.Println("error ", string(err.Error()))
+		responseHandleMessage(w, r, RspOK, err.Error(), nil)
+		return
+	}
 	responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
 }
 
