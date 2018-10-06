@@ -395,6 +395,18 @@ func (s *Server) findAreaWithLocation(long float64, lat float64) (ret *Area) {
 	return nil
 }
 
+func (s *Server) findAreaWithID(id string) (ret *Area) {
+	session := s.db.Copy()
+	defer session.Close()
+	c := session.DB("iamhere").C("areas")
+	var areaMatchs []*Area
+	err := c.Find(bson.M{"_id": bson.ObjectIdHex(id)}).All(&areaMatchs)
+	if err != nil {
+		return nil
+	}
+	return areaMatchs[0]
+}
+
 func findAllArea(session *mgo.Session) (ret []*Area) {
 	c := session.DB("iamhere").C("areas")
 	var q *mgo.Query

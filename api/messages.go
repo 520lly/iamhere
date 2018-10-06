@@ -287,6 +287,7 @@ func (s *Server) handleMessagesPut(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("handleMessagesPost")
 	var m Message
+	var geoEnable bool = false
 	if err := decodeBody(r, &m); err != nil {
 		respondErr(w, r, http.StatusBadRequest, "failed to read msg from request!! error:", err)
 		return
@@ -297,42 +298,43 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 	} else if len(m.Content) == 0 {
 		responseHandleMessage(w, r, http.StatusBadRequest, "Content is empty", nil)
 		return
-	} else if m.Latitude >= LatitudeMaximum || m.Latitude <= LatitudeMinimum {
-		responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
-		return
-	} else if m.Longitude >= LongitudeMaximum || m.Longitude <= LongitudeMinimum {
-		responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
-		return
 	} else if m.ExpiryTime == 0 {
 		m.ExpiryTime = time.Now().Unix()
 	}
-	log.Println("msg longitude: ", m.Longitude, "latitude: ", m.Latitude, "altitude: ", m.Altitude)
-
+	var area *Area = nil
+	if len(m.AreaID) != 0 {
+		//use areaid
+		log.Println("m.AreaID=", m.AreaID)
+		area = s.findAreaWithID(m.AreaID)
+		m.Location.Coordinates = []float64{0, 0}
+		m.Location.Type = "Point"
+	} else {
+		geoEnable = true
+		if m.Latitude >= LatitudeMaximum || m.Latitude <= LatitudeMinimum {
+			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+			return
+		} else if m.Longitude >= LongitudeMaximum || m.Longitude <= LongitudeMinimum {
+			responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+			return
+		}
+		log.Println("msg longitude: ", m.Longitude, "latitude: ", m.Latitude, "altitude: ", m.Altitude)
+		m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
+		m.Location.Type = "Point"
+		area = s.findAreaWithLocation(m.Longitude, m.Latitude)
+		m.AreaID = string(bson.ObjectId(area.ID).Hex())
+	}
 	m.TimeStamp = time.Now().Unix()
-	m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
-	m.Location.Type = "Point"
 	m.ID = bson.NewObjectId()
 	session := s.db.Copy()
 	defer session.Close()
 	var c *mgo.Collection
-	area := s.findAreaWithLocation(m.Longitude, m.Latitude)
 	if area != nil {
-		m.AreaID = string(bson.ObjectId(area.ID).Hex())
+		log.Println("area.ID=", area.ID)
 		c = session.DB("iamhere").C("messages")
 		err := c.Insert(m)
 		if err != nil {
 			responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
 			return
-		}
-		// ensure
-		// Creating the indexes
-		index := mgo.Index{
-			Key: []string{"$2dsphere:location"},
-		}
-		err = c.EnsureIndex(index)
-		if err != nil {
-			log.Println("There is index error")
-			respondErr(w, r, http.StatusBadRequest, err, nil)
 		}
 	} else {
 		//it's a none area belonging message
@@ -343,12 +345,15 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 			responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
 			return
 		}
+	}
+	log.Println("geoEnable=", geoEnable)
+	if geoEnable {
 		// ensure
 		// Creating the indexes
 		index := mgo.Index{
 			Key: []string{"$2dsphere:location"},
 		}
-		err = c.EnsureIndex(index)
+		err := c.EnsureIndex(index)
 		if err != nil {
 			log.Println("There is index error")
 			respondErr(w, r, http.StatusBadRequest, err, nil)
