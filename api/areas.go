@@ -404,7 +404,10 @@ func (s *Server) findAreaWithID(id string) (ret *Area) {
 	if err != nil {
 		return nil
 	}
-	return areaMatchs[0]
+	if len(areaMatchs) > 0 {
+		return areaMatchs[0]
+	}
+	return nil
 }
 
 func findAllArea(session *mgo.Session) (ret []*Area) {

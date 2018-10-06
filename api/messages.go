@@ -110,11 +110,21 @@ func (s *Server) handleMessagesGet(w http.ResponseWriter, r *http.Request) {
 	areaid := r.URL.Query().Get("areaid")
 	log.Println("areaid=", areaid)
 	if len(areaid) != 0 {
-		err := c.Find(bson.M{"areaid": areaid}).All(&msgs)
-		log.Println("msgs size", len(msgs))
-		if err == nil {
-			responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
-			return
+		if areaid == "Ocean" {
+			//return some of messages from Ocean
+			err := session.DB("iamhere").C("msgcoean").Find(nil).All(&msgs)
+			if err == nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
+			log.Println("msgcoean msgs size", len(msgs))
+		} else {
+			err := c.Find(bson.M{"areaid": areaid}).All(&msgs)
+			log.Println("msgs size", len(msgs))
+			if err == nil {
+				responseHandleMessage(w, r, RspOK, ReasonSuccess, &msgs)
+				return
+			}
 		}
 	}
 	msgLon := r.URL.Query().Get("longitude")
@@ -337,13 +347,16 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		//it's a none area belonging message
-		m.AreaID = MessageTypeOcean
-		c = session.DB("iamhere").C("msgcoean")
-		err := c.Insert(m)
-		if err != nil {
-			responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
-			return
+		if len(m.AreaID) != 0 {
+			//it's a none area belonging message
+			m.AreaID = MessageTypeOcean
+			log.Println("area.ID=", MessageTypeOcean)
+			c = session.DB("iamhere").C("msgcoean")
+			err := c.Insert(m)
+			if err != nil {
+				responseHandleMessage(w, r, http.StatusInternalServerError, ReasonInsertFailure, nil)
+				return
+			}
 		}
 	}
 	log.Println("geoEnable=", geoEnable)
