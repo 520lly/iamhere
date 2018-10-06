@@ -260,7 +260,7 @@ func (s *Server) handleMessagesPut(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Println("likecount=", lc)
 		colQuerier := bson.M{"_id": bson.ObjectIdHex(p.ID)}
-		change := bson.M{"$set": bson.M{"likecount": lc, "timestamp": time.Now().Unix()}}
+		change := bson.M{"$set": bson.M{"likecount": lc}}
 		err = c.Update(colQuerier, change)
 		if err != nil {
 			log.Println("error=", err.Error())
@@ -278,7 +278,7 @@ func (s *Server) handleMessagesPut(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Println("recommend=", rc)
 		colQuerier := bson.M{"_id": bson.ObjectIdHex(p.ID)}
-		change := bson.M{"$set": bson.M{"recommend": rc, "timestamp": time.Now().Unix()}}
+		change := bson.M{"$set": bson.M{"recommend": rc}}
 		err = c.Update(colQuerier, change)
 		if err != nil {
 			responseHandleMessage(w, r, RspFailed, ReasonOperationFailed, nil)
