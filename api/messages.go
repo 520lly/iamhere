@@ -312,26 +312,41 @@ func (s *Server) handleMessagesPost(w http.ResponseWriter, r *http.Request) {
 		m.ExpiryTime = time.Now().Unix()
 	}
 	var area *Area = nil
-	if len(m.AreaID) != 0 {
-		//use areaid
-		log.Println("m.AreaID=", m.AreaID)
-		area = s.findAreaWithID(m.AreaID)
-		m.Location.Coordinates = []float64{0, 0}
-		m.Location.Type = "Point"
+	if m.Latitude >= LatitudeMaximum || m.Latitude <= LatitudeMinimum {
+		responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
+		return
+	} else if m.Longitude >= LongitudeMaximum || m.Longitude <= LongitudeMinimum {
+		responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
+		return
 	} else {
-		geoEnable = true
-		if m.Latitude >= LatitudeMaximum || m.Latitude <= LatitudeMinimum {
-			responseHandleMessage(w, r, http.StatusBadRequest, "latitude is out of range", nil)
-			return
-		} else if m.Longitude >= LongitudeMaximum || m.Longitude <= LongitudeMinimum {
-			responseHandleMessage(w, r, http.StatusBadRequest, "longitude is out of range", nil)
-			return
-		}
 		log.Println("msg longitude: ", m.Longitude, "latitude: ", m.Latitude, "altitude: ", m.Altitude)
 		m.Location.Coordinates = []float64{m.Longitude, m.Latitude}
 		m.Location.Type = "Point"
-		area = s.findAreaWithLocation(m.Longitude, m.Latitude)
-		m.AreaID = string(bson.ObjectId(area.ID).Hex())
+		if len(m.AreaID) != 0 {
+			//use areaid
+			log.Println("m.AreaID=", m.AreaID)
+			if m.AreaID != "Ocean" {
+				area = s.findAreaWithID(m.AreaID)
+			} else if m.Latitude == 0 && m.Latitude == 0 {
+				responseHandleMessage(w, r, http.StatusBadRequest, "AreaID or (longitude and latitude) must be available", nil)
+				return
+			}
+		} else {
+			if m.Latitude == 0 && m.Latitude == 0 {
+				responseHandleMessage(w, r, http.StatusBadRequest, "AreaID or (longitude and latitude) must be available", nil)
+				return
+			} else {
+				area = s.findAreaWithLocation(m.Longitude, m.Latitude)
+				if area != nil {
+					m.AreaID = string(bson.ObjectId(area.ID).Hex())
+					geoEnable = true
+				} else {
+					//Ocean message
+					m.AreaID = "Ocean"
+					log.Println("m.AreaID=", m.AreaID)
+				}
+			}
+		}
 	}
 	m.TimeStamp = time.Now().Unix()
 	m.ID = bson.NewObjectId()

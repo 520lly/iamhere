@@ -12,28 +12,30 @@ set -e                     #exit when error hanppens
 #IP=35.187.154.122
 IP=localhost
 #IP=www.historytest.com
-PORT=8090
-#PORT=8080
-#data='{"areaid":"5b75785381b37308243c79ec","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000}'
-data='{"areaid":"5b75785381b37308243c79ec","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597}'
+#PORT=8090
+PORT=8080
+data='{"areaid":"5b75785381b37308243c79ec","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000}'
+#data='{"areaid":"","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000}'
+#data='{"areaid":"","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597}'
 #data='{"areaid":"5b89554755dcfd7e9d0e3e33","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597}'
 
 #curl -X GET "https://www.historystest.com/messages/${1:-""}?key=abc123" | jq
 #curl -X PUT "https://www.historystest.com/messages/?key=abc123&likecount=1" | jq
 #curl -X PUT "https://www.historystest.com/messages/${1:-""}/?key=abc123&likecount=${2:-""}&recommend=${3:-""}" | jq
-#curl --data "$data" -X POST "https://www.historystest.com/messages/?key=abc123" | jq
-curl -X GET "https://www.historystest.com/messages/?key=abc123&debug=1" | jq
-curl -X GET "https://www.historystest.com/messages/?key=abc123&areaid=${1:-""}" | jq
+#curl --data "$data" -X POST "https://www.historystest.com/messages/?key=abc123"
+#curl -X GET "https://www.historystest.com/messages/?key=abc123&debug=1" | jq
+#curl -X GET "http://$IP:8080/areas/?key=abc123&debug=0"
+curl --data "$data" -X POST "http://$IP:$PORT/messages/?key=abc123"
+curl -X GET "http://$IP:$PORT/messages/?key=abc123&areaid=${1:-""}" | jq
 #curl -X GET "https://www.historystest.com/messages/?key=abc123&areaid=${1:-""}" | jq
-#curl --data "$data" -X POST "http://$IP:$PORT/messages/?key=abc123"
-#curl -X GET "http://$IP:$PORT/messages/?key=abc123&debug=1" | jq
+#curl -X GET "http://$IP:$PORT/messages/?key=abc123&debug=1"
+#exit
 #curl -X GET "http://$IP:$PORT/messages/?key=abc123&areaid=${1:-""}" | jq
 #curl -X GET "https://www.historystest.com/messages/?key=abc123&debug=1" | jq
 ###curl --data '{"title":"test","options":["one","two","three"]}' -X POST http://$IP:8080/polls/?key=abc123
 #curl -X DELETE http://$IP:8080/messages/${1:-""}?key=abc123
 #curl --data '{"longitude":39, "latitude":123}' -X GET "http://$IP:8080/messages/?key=abc123&&debug=1" | jq
 #curl -X GET "http://$IP:8080/messages/?key=abc123&debug=1"
-#curl -X GET "http://$IP:8080/areas/?key=abc123&debug=0"
 #curl -X GET "http://$IP:8080/areas/?key=abc123&debug=16"
 #curl -X GET "http://$IP:8080/messages/?key=abc123&debug=16"
 #curl -X GET "http://$IP:$PORT/messages/?key=abc123&areaid=${1:-""}" | jq
