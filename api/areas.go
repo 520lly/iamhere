@@ -287,10 +287,11 @@ func (s *Server) handleAreasPost(w http.ResponseWriter, r *http.Request) {
 	} else if p.Longitude >= LongitudeMaximum || p.Longitude <= LongitudeMinimum {
 		responseHandleAreas(w, r, http.StatusBadRequest, "longitude is out of range", nil)
 		return
-	} else if p.Radius >= RadiusMaximum || p.Radius <= RadiusMinimum {
-		responseHandleAreas(w, r, http.StatusBadRequest, "radius is out of range", nil)
-		return
 	}
+	//else if p.Radius >= RadiusMaximum || p.Radius <= RadiusMinimum {
+	//responseHandleAreas(w, r, http.StatusBadRequest, "radius is out of range", nil)
+	//return
+	//}
 	apikey, ok := APIKey(r.Context())
 	if !ok {
 		responseHandleAreas(w, r, RspFailed, ReasonFailureAPIKey, nil)
