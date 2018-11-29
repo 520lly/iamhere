@@ -46,4 +46,11 @@ type Configuration struct {
 		Host     string
 		Port     string
 	}
+
+	ExternalUrl struct {
+		Wechat struct {
+			Url       string
+			GrantType string
+		}
+	}
 }

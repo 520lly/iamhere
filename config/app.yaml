@@ -32,3 +32,8 @@ database:
    host:     "localhost"
    port:     "27017"
 
+externalurl:
+   wechat:
+       url: "https://api.weixin.qq.com/sns/jscode2session"
+       granttype: "authorization_code"
+

@@ -111,38 +111,49 @@ func UpdateAccount(c echo.Context) error {
 
 func ValidateAccount(c echo.Context) error {
 	//username could be associatedId/phonenumber/email query from URL.Query
+	validatedPass := true
 	lu := new(LoginUser)
 	if err := c.Bind(lu); err != nil {
-		//Missing failed
+		//Missing params failed
 		rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
 		RespondJ(c, RspBadRequest, rsp)
 		return NewError(ReasonMissingParam)
 	}
 	c.Logger().Debug("LoginUser:", JsonToString(lu))
 
-	if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
-		//LoginValidate failed
-		rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
-		RespondJ(c, RspBadRequest, rsp)
-		return NewError(ReasonAuthFailed)
+	if lu.UserType == UserType_Wechat {
+		c.Logger().Debug("Requst Wechat Authentication")
+		if err := RequstSessionAndOpenId(c, lu); err != nil {
+			c.Logger().Debug(err.Error())
+			validatedPass = false
+		}
+	} else {
+		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
+			//LoginValidate failed
+			rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
+			RespondJ(c, RspBadRequest, rsp)
+			return NewError(ReasonAuthFailed)
+		}
 	}
-	// Create token
-	token := CreateNewJWTToken()
+	if validatedPass {
+		// Create token
+		token := CreateNewJWTToken()
 
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["name"] = lu.UserId
-	claims["admin"] = false
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		// Set claims
+		claims := token.Claims.(jwt.MapClaims)
+		claims["name"] = lu.UserId
+		claims["admin"] = false
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(Config.ApiConfig.Secret))
-	if err != nil {
-		return err
+		// Generate encoded token and send it as response.
+		t, err := token.SignedString([]byte(Config.ApiConfig.Secret))
+		if err != nil {
+			return err
+		}
+		rsp := &Response{RspOK, ReasonSuccess, map[string]string{
+			"token": t,
+		}, 0}
+		RespondJ(c, RspOK, rsp)
 	}
-	rsp := &Response{RspOK, ReasonSuccess, map[string]string{
-		"token": t,
-	}, 0}
-	RespondJ(c, RspOK, rsp)
 	return echo.ErrUnauthorized
 }

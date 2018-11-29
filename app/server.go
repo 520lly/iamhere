@@ -32,6 +32,7 @@ func main() {
 	api.Use(middleware.Logger())
 	api.Use(middleware.Recover())
 
+	//load customized config
 	InitConfig(api.Logger)
 	if Config.AppConfig.EnableDebug {
 		api.Logger.SetLevel(log.DEBUG)

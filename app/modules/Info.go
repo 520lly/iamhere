@@ -30,7 +30,7 @@ const (
 	CategoryOcean   int = 2                //defined by system for ocean
 	CategoryIsland  int = 4                //defined by system for island
 	CategoryCloud   int = 8                //defined by system for cloud
-	CategoryUser    int = 16                //defined by user
+	CategoryUser    int = 16               //defined by user
 	CategoryMaximum int = CategoryUser + 1 //Category Maximum
 )
 
@@ -65,6 +65,13 @@ const (
 	RandomItemLimit int = 10
 )
 
+const (
+	UserType_Wechat      int = 0                  //The user account type is wechat
+	UserType_PhoneNumber int = 1                  //The user account type is wechat
+	UserType_Email       int = 2                  //The user account type is wechat
+	UserType_Other       int = UserType_Email + 1 //The user account type is wechat
+)
+
 type GeoJson struct {
 	Type        string    `josn:"type"`
 	Coordinates []float64 `json:"coordinates"`
@@ -79,6 +86,14 @@ type Response struct {
 
 // Login User
 type LoginUser struct {
-	UserId   string `json:"userid" form:"userid" query:"userid"`
-	Password string `json:"password" form:"password" query:"password"`
+	UserId   string `json:"userid" form:"userid" query:"userid"`       //for Wechat user, userid is weapp appid
+	Password string `json:"password" form:"password" query:"password"` // for wechat user, password is secret
+	JsCode   string `json:"jscode" form:"jscode" query:"jscode"`       // for wechat user, the value matters or make no sense
+	UserType int    `json:"usertype" form:"usertype" query:"usertype"` // for wechat user, the usetype should be UserType_Wechat(0)
+}
+
+type WechatOpenId struct {
+	OpenId     string `json:"openid" from:"openid" query:"openid"`
+	SessionKey string `json:"session_key" from:"session_key" query:"session_key"`
+	ExpiresIn  int    `json:"expired_in" from:"expired_in" query:"expired_in"`
 }
