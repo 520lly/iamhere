@@ -69,7 +69,7 @@ func CreateRandomNickname() string {
 }
 
 func GetJWTSecretCode() []byte {
-	return []byte("secret")
+	return []byte(Config.ApiConfig.Secret)
 }
 
 func CreateNewJWTToken() *jwt.Token {

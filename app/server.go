@@ -64,6 +64,7 @@ func main() {
 	//redirect HTTP to HTTPS
 	//api.Pre(middleware.HTTPSRedirect())
 
+	api.Logger.Debug("JWT secret ", GetJWTSecretCode())
 	// Routes
 	controllers.HandleMessages(api)
 	controllers.HandleAreas(api)

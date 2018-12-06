@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strconv"
 	"time"
 
 	. "github.com/520lly/iamhere/app/iamhere"
@@ -17,7 +18,8 @@ func HandleAccounts(e *echo.Echo) {
 	g.PUT("/:id", UpdateAccount)
 	g.POST("/login", ValidateAccount)
 	g.GET("/login/", ValidateAccount)
-	g.GET("/", GetAccounts)
+	g.GET("/:id", GetAccounts)
+	g.GET("", GetAccounts)
 	g.DELETE("/:id", DeleteAccounts)
 }
 
@@ -114,10 +116,32 @@ func ValidateAccount(c echo.Context) error {
 	validatedPass := true
 	lu := new(LoginUser)
 	if err := c.Bind(lu); err != nil {
-		//Missing params failed
-		rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
-		RespondJ(c, RspBadRequest, rsp)
-		return NewError(ReasonMissingParam)
+		//not Response immediately and check using URL Query
+		lu.UserId = c.QueryParam("userid")
+		lu.Password = c.QueryParam("password")
+		usertypeS := c.QueryParam("usertype")
+		if len(usertypeS) == 0 {
+			rsp := &Response{RspBadRequest, ReasonMissingParam + "usertype", nil, 0}
+			RespondJ(c, RspBadRequest, rsp)
+			return NewError(ReasonMissingParam)
+		}
+		i, err := strconv.Atoi(usertypeS)
+		if err != nil {
+			rsp := &Response{RspBadRequest, ReasonFailureParam + "usertype", nil, 0}
+			RespondJ(c, RspBadRequest, rsp)
+			return NewError(ReasonMissingParam)
+		}
+		lu.UserType = i
+		c.Logger().Debug("i = ", i)
+		if i == UserType_Wechat {
+			lu.JsCode = c.QueryParam("jscode")
+			c.Logger().Debug("jscode = ", lu.JsCode)
+			if len(lu.JsCode) == 0 {
+				rsp := &Response{RspBadRequest, ReasonMissingParam + "jscode", nil, 0}
+				RespondJ(c, RspBadRequest, rsp)
+				return NewError(ReasonMissingParam)
+			}
+		}
 	}
 	c.Logger().Debug("LoginUser:", JsonToString(lu))
 
@@ -130,6 +154,7 @@ func ValidateAccount(c echo.Context) error {
 	} else {
 		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
 			//LoginValidate failed
+			validatedPass = false
 			rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
 			RespondJ(c, RspBadRequest, rsp)
 			return NewError(ReasonAuthFailed)

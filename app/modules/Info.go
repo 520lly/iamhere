@@ -48,18 +48,18 @@ const (
 	RspInternalServerError int = http.StatusInternalServerError
 )
 const (
-	ReasonSuccess         string = "Success"
-	ReasonFailureParam    string = "Wrong parameter"
-	ReasonMissingParam    string = "Missing parameter"
-	ReasonFailureAPIKey   string = "Wrong APIKey"
-	ReasonFailueGeneral   string = "Failure in general"
-	ReasonDuplicate       string = "Parameter duplicated"
-	ReasonInsertFailure   string = "Insert failed"
-	ReasonWrongPw         string = "Wrong Password "
-	ReasonOperationFailed string = "Operation Failure "
-	ReasonNotFound        string = "Not Found"
-	ReasonAlreadyExist    string = "Already Existed"
-	ReasonAuthFailed      string = "Authentication failed "
+	ReasonSuccess         string = "Success "
+	ReasonFailureParam    string = "Wrong parameter: "
+	ReasonMissingParam    string = "Missing parameter: "
+	ReasonFailureAPIKey   string = "Wrong APIKey: "
+	ReasonFailueGeneral   string = "Failure in general: "
+	ReasonDuplicate       string = "Parameter duplicated: "
+	ReasonInsertFailure   string = "Insert failed: "
+	ReasonWrongPw         string = "Wrong Password:  "
+	ReasonOperationFailed string = "Operation Failure:  "
+	ReasonNotFound        string = "Not Found: "
+	ReasonAlreadyExist    string = "Already Existed: "
+	ReasonAuthFailed      string = "Authentication failed:  "
 )
 const (
 	RandomItemLimit int = 10

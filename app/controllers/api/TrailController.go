@@ -10,7 +10,6 @@ import (
 func HandleTrail(e *echo.Echo) {
 	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Trails.Group
 	g := e.Group(urlGroup)
-	g.GET("/", GetTrailMessages)
 	g.GET("", GetTrailMessages)
 	g.GET("/:longitude&:latitude", GetMessages)
 }

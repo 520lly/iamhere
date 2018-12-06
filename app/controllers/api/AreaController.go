@@ -1,10 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
-	//"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -13,9 +13,10 @@ func HandleAreas(e *echo.Echo) {
 	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Areas.Group
 	g := e.Group(urlGroup)
 	g.Use(middleware.JWT(GetJWTSecretCode()))
-	g.POST("/", CreateNewArea)
+	g.POST("", CreateNewArea)
 	g.PUT("/:id", UpdateArea)
-	g.GET("/", GetAreas)
+	g.GET("", GetAreas)
+	g.GET("/:id", GetAreas)
 	g.DELETE("/:id", DeleteAreas)
 }
 
@@ -68,6 +69,12 @@ func GetAreas(c echo.Context) error {
 			//Get all areas for debugging purpose
 			debugF = true
 		}
+	} else {
+		err := errors.New("Error when Query URL")
+		//rsp.Code = RspBadRequest
+		//rsp.Reason = err.Error()
+		//RespondJ(c, RspBadRequest, rsp)
+		return err
 	}
 	if err := HandleGetAreas(c, &area, debugF); err != nil {
 		c.Logger().Debug(err.Error())

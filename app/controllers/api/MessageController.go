@@ -13,7 +13,7 @@ func HandleMessages(e *echo.Echo) {
 	g := e.Group(urlGroup)
 	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("", CreateNewMessage)
-	g.GET("/", GetMessages)
+	g.GET("/:id", GetMessages)
 	g.GET("", GetMessages)
 	g.DELETE("/:id", DeleteMessages)
 }

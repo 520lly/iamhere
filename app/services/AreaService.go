@@ -66,12 +66,13 @@ func HandleCreateNewArea(c echo.Context, area *Area) error {
 			rsp.Reason = "Longitude is out of range"
 			RespondJ(c, RspBadRequest, rsp)
 			return NewError("Longitude is out of range")
-		} else if !CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) {
-			rsp.Code = RspBadRequest
-			rsp.Reason = "Radius is out of range"
-			RespondJ(c, RspBadRequest, rsp)
-			return NewError("Radius is out of range")
 		}
+		//else if !CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) {
+		//rsp.Code = RspBadRequest
+		//rsp.Reason = "Radius is out of range"
+		//RespondJ(c, RspBadRequest, rsp)
+		//return NewError("Radius is out of range")
+		//}
 		area.TimeStamp = CreateTimeStampUnix()
 		area.Location.Coordinates = []float64{area.Longitude, area.Latitude}
 		area.Location.Type = "Point"
@@ -261,16 +262,17 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 			}
 			CreateGeoIndex(DBCAreas)
 			changed = true
-		} else if CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) && area.Radius != areaStored.Radius {
-			if !UpdateByIdField(DBCAreas, area.ID, "radius", area.Radius) {
-				//update radius failed
-				rsp.Code = RspBadRequest
-				rsp.Reason = ReasonOperationFailed
-				RespondJ(c, RspBadRequest, rsp)
-				return NewError(ReasonOperationFailed)
-			}
-			changed = true
 		}
+		//else if CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) && area.Radius != areaStored.Radius {
+		//if !UpdateByIdField(DBCAreas, area.ID, "radius", area.Radius) {
+		////update radius failed
+		//rsp.Code = RspBadRequest
+		//rsp.Reason = ReasonOperationFailed
+		//RespondJ(c, RspBadRequest, rsp)
+		//return NewError(ReasonOperationFailed)
+		//}
+		//changed = true
+		//}
 		if changed {
 			RespondJ(c, RspOK, rsp)
 			return nil
