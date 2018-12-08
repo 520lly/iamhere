@@ -2,7 +2,7 @@ appname: "iamhere"
 version: "0.0.1"
 
 appconfig:
-   host:           "localhost"
+   host:           ""
    port:           "9090"
    loggerPrefix:   "iamhere"
    enableDebug:    true

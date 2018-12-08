@@ -265,16 +265,22 @@ func GetSpecifiedLocationMessages(collection *mgo.Collection, lon float64, lat f
 }
 
 func Insert(collection *mgo.Collection, i interface{}) bool {
-	err := collection.Insert(i)
-	return Err(err)
+	if err := collection.Insert(i); err != nil {
+		logger.Error("UpdateById Err:", err.Error())
+		return false
+	}
+	return true
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //Update functions
 //////////////////////////////////////////////////////////////////////////////
 func Update(collection *mgo.Collection, query interface{}, i interface{}) bool {
-	err := collection.Update(query, i)
-	return Err(err)
+	if err := collection.Update(query, i); err != nil {
+		logger.Error("UpdateById Err:", err.Error())
+		return false
+	}
+	return true
 }
 
 //func Upsert(collection *mgo.Collection, query interface{}, i interface{}) bool {
@@ -287,8 +293,12 @@ func Update(collection *mgo.Collection, query interface{}, i interface{}) bool {
 //}
 
 func UpdateById(collection *mgo.Collection, id bson.ObjectId, i interface{}) bool {
-	err := collection.Update(GetIdBsonQ(id), i)
-	return Err(err)
+	//if err := collection.Update(GetIdBsonQ(id), i); err != nil {
+	if err := collection.UpdateId(id, i); err != nil {
+		logger.Error("UpdateById Err:", err.Error())
+		return false
+	}
+	return true
 }
 
 //func UpdateByIdAndUserId2(collection *mgo.Collection, id, userId bson.ObjectId, i interface{}) bool {
@@ -297,6 +307,7 @@ func UpdateById(collection *mgo.Collection, id bson.ObjectId, i interface{}) boo
 //}
 
 func UpdateByIdField(collection *mgo.Collection, id bson.ObjectId, field string, value interface{}) bool {
+	logger.Debug("UpdateByIdField, field: ", field, " <----> value: ", value)
 	return UpdateById(collection, id, bson.M{"$set": bson.M{field: value}})
 }
 

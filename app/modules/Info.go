@@ -67,9 +67,9 @@ const (
 
 const (
 	UserType_Wechat      int = 0                  //The user account type is wechat
-	UserType_PhoneNumber int = 1                  //The user account type is wechat
-	UserType_Email       int = 2                  //The user account type is wechat
-	UserType_Other       int = UserType_Email + 1 //The user account type is wechat
+	UserType_PhoneNumber int = 1                  //The user account type is phonenumber
+	UserType_Email       int = 2                  //The user account type is email
+	UserType_Other       int = UserType_Email + 1 //The user account type is other
 )
 
 type GeoJson struct {

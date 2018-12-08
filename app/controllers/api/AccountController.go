@@ -17,7 +17,7 @@ func HandleAccounts(e *echo.Echo) {
 	g.POST("/register", CreateNewAccount)
 	g.PUT("/:id", UpdateAccount)
 	g.POST("/login", ValidateAccount)
-	g.GET("/login/", ValidateAccount)
+	g.GET("/login", ValidateAccount)
 	g.GET("/:id", GetAccounts)
 	g.GET("", GetAccounts)
 	g.DELETE("/:id", DeleteAccounts)
@@ -147,9 +147,22 @@ func ValidateAccount(c echo.Context) error {
 
 	if lu.UserType == UserType_Wechat {
 		c.Logger().Debug("Requst Wechat Authentication")
-		if err := RequstSessionAndOpenId(c, lu); err != nil {
-			c.Logger().Debug(err.Error())
+		if err, woi := RequstSessionAndOpenId(c, lu); err != nil {
+			c.Logger().Debug("RequstSessionAndOpenId Err: ", err.Error())
 			validatedPass = false
+			rsp := &Response{RspBadRequest, err.Error(), nil, 0}
+			RespondJ(c, RspBadRequest, rsp)
+		} else {
+			//handle expired_in data from Wechat server
+			user := User{AssociatedId: woi.OpenId, Password: lu.Password}
+			if err := HandleCreateNewUser(c, &user); err != nil {
+				c.Logger().Debug("HandleCreateNewUser Err: ", err.Error())
+				validatedPass = false
+				rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
+				RespondJ(c, RspBadRequest, rsp)
+				return err
+			}
+			return nil
 		}
 	} else {
 		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {

@@ -13,9 +13,10 @@ import (
 	"github.com/labstack/echo"
 )
 
-func RequstSessionAndOpenId(c echo.Context, lu *LoginUser) error {
+func RequstSessionAndOpenId(c echo.Context, lu *LoginUser) (error, WechatOpenId) {
 	fullUrl := Config.ExternalUrl.Wechat.Url + "?appid=" + lu.UserId + "&secret=" + lu.Password + "js_code=" + lu.JsCode + "grant_type" + Config.ExternalUrl.Wechat.GrantType
 	c.Logger().Debug("fullUrl is --->", fullUrl)
+	var wechatOpenId WechatOpenId
 	tr := &http.Transport{
 		MaxIdleConns:       10,
 		IdleConnTimeout:    30 * time.Second,
@@ -25,21 +26,20 @@ func RequstSessionAndOpenId(c echo.Context, lu *LoginUser) error {
 	resp, err := client.Get(fullUrl)
 	if err != nil {
 		// handle error
-		return err
+		return err, wechatOpenId
 	}
 	//return Success then parse response.
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		// handle error
-		return err
+		return err, wechatOpenId
 	}
-	var wechatOpenId WechatOpenId
 	json.Unmarshal(body, &wechatOpenId)
 	c.Logger().Debug("wechatOpenId", wechatOpenId)
 	if wechatOpenId.OpenId == "" || wechatOpenId.SessionKey == "" {
 		// handle error
-		return errors.New("Error:Wrong jscode/secret/appid")
+		return errors.New("Error:Wrong jscode/secret/appid"), wechatOpenId
 	}
-	return nil
+	return nil, wechatOpenId
 }

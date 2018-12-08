@@ -6,7 +6,7 @@ import (
 
 type Area struct {
 	ID          bson.ObjectId `bson:"_id" json:"id"`
-	Name        string        `json:"name" bson:"name valid:"alphanum,printableascii""`
+	Name        string        `json:"name" bson:"name" valid:"alphanum,printableascii"`
 	Province    string        `json:"province" bson:"province" valid:"alphanum,printableascii"`
 	City        string        `json:"city" bson:"city" valid:"alphanum,printableascii"`
 	District    string        `json:"district" bson:"district" valid:"alphanum,printableascii"`

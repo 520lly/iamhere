@@ -188,6 +188,81 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 	return nil
 }
 
+func HandleUpdateMessage(c echo.Context, msg *Message) error {
+	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
+	c.Logger().Debug("Update msg:", msg)
+	changed := false
+	if len(BsonToString(msg.ID)) != 0 {
+		var msgStored Message
+		if err := Get(DBCAreaMessages, msg.ID, &msgStored); err != nil {
+			c.Logger().Debug("Failed to find msg with ID:", msg.ID)
+			if err := Get(DBCOceanMessages, msg.ID, &msgStored); err != nil {
+				if len(msg.LikeCount) != 0 && msg.LikeCount != msgStored.LikeCount {
+					if !UpdateByIdField(DBCOceanMessages, msg.ID, "likecount", msg.LikeCount) {
+						//update likecount failed
+						rsp.Code = RspBadRequest
+						rsp.Reason = ReasonOperationFailed
+						RespondJ(c, RspBadRequest, rsp)
+						return NewError(ReasonOperationFailed)
+					}
+					changed = true
+				}
+				if len(msg.Recommend) != 0 && msg.Recommend != msgStored.Recommend {
+					if !UpdateByIdField(DBCOceanMessages, msg.ID, "recommend", msg.Recommend) {
+						//update firstname failed
+						rsp.Code = RspBadRequest
+						rsp.Reason = ReasonOperationFailed
+						RespondJ(c, RspBadRequest, rsp)
+						return NewError(ReasonOperationFailed)
+					}
+					changed = true
+				}
+			} else {
+				rsp.Code = RspBadRequest
+				rsp.Reason = err.Error()
+				RespondJ(c, RspBadRequest, rsp)
+				return err
+			}
+		} else {
+			if len(msg.LikeCount) != 0 && msg.LikeCount != msgStored.LikeCount {
+				if !UpdateByIdField(DBCAreaMessages, msg.ID, "likecount", msg.LikeCount) {
+					//update likecount failed
+					rsp.Code = RspBadRequest
+					rsp.Reason = ReasonOperationFailed
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonOperationFailed)
+				}
+				changed = true
+			}
+			if len(msg.Recommend) != 0 && msg.Recommend != msgStored.Recommend {
+				if !UpdateByIdField(DBCAreaMessages, msg.ID, "recommend", msg.Recommend) {
+					//update firstname failed
+					rsp.Code = RspBadRequest
+					rsp.Reason = ReasonOperationFailed
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonOperationFailed)
+				}
+				changed = true
+			}
+		}
+
+		if changed {
+			RespondJ(c, RspOK, rsp)
+			return nil
+		}
+
+		rsp.Code = RspBadRequest
+		rsp.Reason = ReasonDuplicate
+		RespondJ(c, RspBadRequest, rsp)
+		return NewError(ReasonDuplicate)
+	} else {
+		rsp.Code = RspBadRequest
+		rsp.Reason = ReasonMissingParam
+		RespondJ(c, RspBadRequest, rsp)
+		return NewError(ReasonMissingParam)
+	}
+}
+
 func HandleDeleteMessages(c echo.Context, msg *Message) error {
 	c.Logger().Debug("Delete message ID :", msg.ID)
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}

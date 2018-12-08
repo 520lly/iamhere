@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
@@ -14,6 +16,7 @@ func HandleMessages(e *echo.Echo) {
 	g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("", CreateNewMessage)
 	g.GET("/:id", GetMessages)
+	g.PUT("/:id", UpdateMessages)
 	g.GET("", GetMessages)
 	g.DELETE("/:id", DeleteMessages)
 }
@@ -63,6 +66,54 @@ func GetMessages(c echo.Context) error {
 		}
 	}
 	if err := HandleGetMessages(c, &msg, debugF); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateMessages(c echo.Context) error {
+	var msg Message
+	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
+	if err := c.Bind(msg); err != nil {
+		//not Response immediately and check using URL Query
+		p := NewPath(c.Request().URL.Path)
+		if p.HasID() {
+			likecount := c.QueryParam("likecount")
+			if len(likecount) != 0 {
+				lc, err := strconv.ParseInt(likecount, 0, 32)
+				if err != nil {
+					rsp.Code = RspBadRequest
+					rsp.Reason = err.Error()
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonMissingParam)
+				}
+				msg.LikeCount = likecount
+				c.Logger().Debug("likecount=", lc)
+			}
+			recommend := c.QueryParam("recommend")
+			c.Logger().Debug("recommend=", recommend)
+			if len(recommend) != 0 {
+				rc, err := strconv.ParseBool(recommend)
+				if err != nil {
+					rsp.Code = RspBadRequest
+					rsp.Reason = err.Error()
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonMissingParam)
+				}
+				msg.Recommend = recommend
+				c.Logger().Debug("recommend=", rc)
+			}
+		} else {
+			c.Logger().Debug("Not specific Message ID")
+			rsp.Code = RspBadRequest
+			rsp.Reason = "Not specific Message ID"
+			RespondJ(c, RspBadRequest, rsp)
+			return NewError("Not specific Message ID")
+		}
+	}
+
+	c.Logger().Debug(JsonToString(msg))
+	if err := HandleUpdateMessage(c, &msg); err != nil {
 		return err
 	}
 	return nil

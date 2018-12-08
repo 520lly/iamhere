@@ -135,6 +135,7 @@ func HandleDeleteAreas(c echo.Context, area *Area) error {
 }
 func HandleUpdateArea(c echo.Context, area *Area) error {
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
+	c.Logger().Debug("ToUpdateArea: ", JsonToString(area))
 	changed := false
 	if len(BsonToString(area.ID)) != 0 {
 		var areaStored Area
@@ -145,7 +146,9 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 			RespondJ(c, RspBadRequest, rsp)
 			return nil
 		}
+		c.Logger().Debug("areaStored: ", JsonToString(areaStored))
 		if len(area.Name) != 0 && area.Name != areaStored.Name {
+			c.Logger().Debug("UpdateByIdField name: ", area.Name)
 			if !UpdateByIdField(DBCAreas, area.ID, "name", area.Name) {
 				//update name failed
 				rsp.Code = RspBadRequest
@@ -154,7 +157,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.Province) != 0 && area.Province != areaStored.Province {
+		}
+		if len(area.Province) != 0 && area.Province != areaStored.Province {
 			if !UpdateByIdField(DBCAreas, area.ID, "province", area.Province) {
 				//update province failed
 				rsp.Code = RspBadRequest
@@ -163,7 +167,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.City) != 0 && area.City != areaStored.City {
+		}
+		if len(area.City) != 0 && area.City != areaStored.City {
 			if !UpdateByIdField(DBCAreas, area.ID, "city", area.City) {
 				//update city failed
 				rsp.Code = RspBadRequest
@@ -172,7 +177,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.District) != 0 && area.District != areaStored.District {
+		}
+		if len(area.District) != 0 && area.District != areaStored.District {
 			if !UpdateByIdField(DBCAreas, area.ID, "district", area.District) {
 				//update district failed
 				rsp.Code = RspBadRequest
@@ -181,7 +187,9 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.Discription) != 0 && area.Discription != areaStored.Discription {
+		}
+		if len(area.Discription) != 0 && area.Discription != areaStored.Discription {
+			c.Logger().Debug("UpdateByIdField discription: ", area.Discription)
 			if !UpdateByIdField(DBCAreas, area.ID, "discription", area.Discription) {
 				//update discription failed
 				rsp.Code = RspBadRequest
@@ -190,7 +198,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.Address1) != 0 && area.Address1 != areaStored.Address1 {
+		}
+		if len(area.Address1) != 0 && area.Address1 != areaStored.Address1 {
 			if !UpdateByIdField(DBCAreas, area.ID, "address1", area.Address1) {
 				//update address1 failed
 				rsp.Code = RspBadRequest
@@ -199,7 +208,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(area.Address2) != 0 && area.Address2 != areaStored.Address2 {
+		}
+		if len(area.Address2) != 0 && area.Address2 != areaStored.Address2 {
 			if !UpdateByIdField(DBCAreas, area.ID, "address2", area.Address2) {
 				//update address2 failed
 				rsp.Code = RspBadRequest
@@ -208,7 +218,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if ValidateAreaCategory(area.Category) && area.Category != areaStored.Category {
+		}
+		if ValidateAreaCategory(area.Category) && area.Category != areaStored.Category {
 			if !UpdateByIdField(DBCAreas, area.ID, "category", area.Category) {
 				//update category failed
 				rsp.Code = RspBadRequest
@@ -217,7 +228,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if ValidateAreaType(area.Type) && area.Type != areaStored.Type {
+		}
+		if ValidateAreaType(area.Type) && area.Type != areaStored.Type {
 			if !UpdateByIdField(DBCAreas, area.ID, "type", area.Type) {
 				//update type failed
 				rsp.Code = RspBadRequest
@@ -226,25 +238,8 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if CheckInRangefloat64(area.Latitude, LatitudeMinimum, LatitudeMaximum) && area.Latitude != areaStored.Latitude {
-			if !UpdateByIdField(DBCAreas, area.ID, "latitude", area.Latitude) {
-				//update latitude failed
-				rsp.Code = RspBadRequest
-				rsp.Reason = ReasonOperationFailed
-				RespondJ(c, RspBadRequest, rsp)
-				return NewError(ReasonOperationFailed)
-			}
-			location := GeoJson{Type: areaStored.Location.Type, Coordinates: []float64{areaStored.Longitude, area.Latitude}}
-			if !UpdateByIdField(DBCAreas, area.ID, "location", location) {
-				//update location failed
-				rsp.Code = RspBadRequest
-				rsp.Reason = ReasonOperationFailed
-				RespondJ(c, RspBadRequest, rsp)
-				return NewError(ReasonOperationFailed)
-			}
-			CreateGeoIndex(DBCAreas)
-			changed = true
-		} else if CheckInRangefloat64(area.Longitude, LongitudeMinimum, LongitudeMaximum) && area.Longitude != areaStored.Longitude {
+		}
+		if CheckInRangefloat64(area.Latitude, LatitudeMinimum, LatitudeMaximum) && area.Latitude != areaStored.Latitude {
 			if !UpdateByIdField(DBCAreas, area.ID, "latitude", area.Latitude) {
 				//update latitude failed
 				rsp.Code = RspBadRequest
@@ -263,7 +258,26 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 			CreateGeoIndex(DBCAreas)
 			changed = true
 		}
-		//else if CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) && area.Radius != areaStored.Radius {
+		if CheckInRangefloat64(area.Longitude, LongitudeMinimum, LongitudeMaximum) && area.Longitude != areaStored.Longitude {
+			if !UpdateByIdField(DBCAreas, area.ID, "latitude", area.Latitude) {
+				//update latitude failed
+				rsp.Code = RspBadRequest
+				rsp.Reason = ReasonOperationFailed
+				RespondJ(c, RspBadRequest, rsp)
+				return NewError(ReasonOperationFailed)
+			}
+			location := GeoJson{Type: areaStored.Location.Type, Coordinates: []float64{areaStored.Longitude, area.Latitude}}
+			if !UpdateByIdField(DBCAreas, area.ID, "location", location) {
+				//update location failed
+				rsp.Code = RspBadRequest
+				rsp.Reason = ReasonOperationFailed
+				RespondJ(c, RspBadRequest, rsp)
+				return NewError(ReasonOperationFailed)
+			}
+			CreateGeoIndex(DBCAreas)
+			changed = true
+		}
+		//if CheckInRangefloat64(area.Radius, RadiusMinimum, RadiusMaximum) && area.Radius != areaStored.Radius {
 		//if !UpdateByIdField(DBCAreas, area.ID, "radius", area.Radius) {
 		////update radius failed
 		//rsp.Code = RspBadRequest
