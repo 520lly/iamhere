@@ -14,7 +14,7 @@ import (
 )
 
 func RequstSessionAndOpenId(c echo.Context, lu *LoginUser) (error, WechatOpenId) {
-	fullUrl := Config.ExternalUrl.Wechat.Url + "?appid=" + lu.UserId + "&secret=" + lu.Password + "js_code=" + lu.JsCode + "grant_type" + Config.ExternalUrl.Wechat.GrantType
+	fullUrl := Config.ExternalUrl.Wechat.Url + "?appid=" + lu.UserId + "&secret=" + lu.Password + "&js_code=" + lu.JsCode + "&grant_type" + Config.ExternalUrl.Wechat.GrantType
 	c.Logger().Debug("fullUrl is --->", fullUrl)
 	var wechatOpenId WechatOpenId
 	tr := &http.Transport{
