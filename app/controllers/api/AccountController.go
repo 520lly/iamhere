@@ -162,7 +162,7 @@ func ValidateAccount(c echo.Context) error {
 				RespondJ(c, RspBadRequest, rsp)
 				return err
 			}
-			return nil
+         //Create User in iamhere with Wechat appid successfully then return token
 		}
 	} else {
 		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
