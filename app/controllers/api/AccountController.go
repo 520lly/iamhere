@@ -192,6 +192,7 @@ func ValidateAccount(c echo.Context) error {
 			"token": t,
 		}, 0}
 		RespondJ(c, RspOK, rsp)
+		return nil
 	}
 	return echo.ErrUnauthorized
 }
