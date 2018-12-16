@@ -161,6 +161,21 @@ func findAllUsers() ([]*User, error) {
 	return users, nil
 }
 
+func FindMsgsWith1Feild(collection *mgo.Collection, m map[string]string) ([]*Message, error) {
+	logger.Debug("m:", m)
+	var msgs []*Message
+	if err := collection.Find(
+		bson.M{"$or": []bson.M{
+			bson.M{m["key1"]: m["value1"]},
+		},
+		}).All(&msgs); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	logger.Debug("msgs:", len(msgs))
+	return msgs, nil
+}
+
 func FindUsersWithFeild(collection *mgo.Collection, m map[string]string) ([]*User, error) {
 	logger.Debug("m:", m)
 	var users []*User
@@ -198,6 +213,7 @@ func FindUsersWithPW(collection *mgo.Collection, m map[string]string) ([]*User, 
 	logger.Debug("users:", len(users))
 	return users, nil
 }
+
 func FindUserWithID(id bson.ObjectId) *User {
 	var user *User
 	if err := findItemWithID(DBCAccounts, id, &user); err != nil {

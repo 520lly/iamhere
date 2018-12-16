@@ -6,13 +6,14 @@ import (
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	//"github.com/labstack/echo/middleware"
 )
 
 func HandleAreas(e *echo.Echo) {
 	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Areas.Group
 	g := e.Group(urlGroup)
-	g.Use(middleware.JWT(GetJWTSecretCode()))
+	//disable JWT for area api
+	//g.Use(middleware.JWT(GetJWTSecretCode()))
 	g.POST("", CreateNewArea)
 	g.PUT("/:id", UpdateArea)
 	g.GET("", GetAreas)

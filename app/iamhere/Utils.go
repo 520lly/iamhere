@@ -1,6 +1,8 @@
 package iamhere
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"math/rand"
@@ -74,6 +76,13 @@ func GetJWTSecretCode() []byte {
 
 func CreateNewJWTToken() *jwt.Token {
 	return jwt.New(jwt.SigningMethodHS256)
+}
+
+//convert a string to hash in MD5
+func GetMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 /**
