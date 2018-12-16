@@ -36,8 +36,8 @@ func RequstSessionAndOpenId(c echo.Context, lu *LoginUser) (error, WechatOpenId)
 		return err, wechatOpenId
 	}
 	json.Unmarshal(body, &wechatOpenId)
-	c.Logger().Debug("resp.Body", wechatOpenId)
-	c.Logger().Debug("wechatOpenId.OpenId", wechatOpenId.OpenId)
+	c.Logger().Debug("resp.Body=", wechatOpenId)
+	c.Logger().Debug("wechatOpenId.OpenId=", wechatOpenId.OpenId)
 	//if wechatOpenId.OpenId == "" || wechatOpenId.SessionKey == "" {
 	if wechatOpenId.OpenId == "" {
 		// handle error

@@ -9,14 +9,16 @@ __version__=0.1
 #set -x                     #print every excution log
 set -e                     #exit when error hanppens
 
-#IP=35.187.154.122
-IP=35.187.231.228
+IP=35.187.154.122
+#IP=35.187.231.228
 #IP=localhost
+PORT=9090
 data='{"areaid":"test","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000}'
 
 #curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123}' -X POST "http://$IP:8080/messages/"
 #curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123}' -X GET "http://$IP:8080/messages/"
-curl -X GET "http://$IP:8080/messages/?debug=121.1754884604"
+curl -X GET "http://$IP:$PORT/api/v1/accounts?debug=1" | jq
+exit
 #curl -X DELETE "http://$IP:8080/areas/${1:-""}"
 #curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":9.7039399637,"longitude":121.1754884604,"altitude":123}' -X GET "http://$IP:8080/areas/"
 #curl -X GET "http://$IP:8080/messages/?longitude=121.1754884604"

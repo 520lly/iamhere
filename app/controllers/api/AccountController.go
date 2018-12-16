@@ -145,17 +145,21 @@ func ValidateAccount(c echo.Context) error {
 	}
 	c.Logger().Debug("LoginUser:", JsonToString(lu))
 
-	if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
-		//LoginValidate failed but if usertype is Wechat, then Requst to Authentication and then Create a new user if successfully
-		if lu.UserType == UserType_Wechat {
-			c.Logger().Debug("Requst Wechat Authentication")
-			if err, woi := RequstSessionAndOpenId(c, lu); err != nil {
-				c.Logger().Debug("RequstSessionAndOpenId Err: ", err.Error())
-				validatedPass = false
-				rsp := &Response{RspBadRequest, err.Error(), nil, 0}
-				RespondJ(c, RspBadRequest, rsp)
+	//if usertype is Wechat, then Requst to Authentication and then Create a new user/ValidateAccount if successfully
+	if lu.UserType == UserType_Wechat {
+		c.Logger().Debug("Requst Wechat Authentication")
+		if err, woi := RequstSessionAndOpenId(c, lu); err != nil {
+			c.Logger().Debug("RequstSessionAndOpenId Err: ", err.Error())
+			validatedPass = false
+			rsp := &Response{RspBadRequest, err.Error(), nil, 0}
+			RespondJ(c, RspBadRequest, rsp)
+		} else {
+			//handle expired_in data from Wechat server
+			lu.UserId = woi.OpenId
+			if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
+				//This is a registered user
 			} else {
-				//handle expired_in data from Wechat server
+				//Not a registered user
 				user := User{AssociatedId: woi.OpenId, Password: lu.Password}
 				if err := HandleCreateNewUser(c, &user); err != nil {
 					c.Logger().Debug("HandleCreateNewUser Err: ", err.Error())
@@ -166,6 +170,10 @@ func ValidateAccount(c echo.Context) error {
 				}
 				//Create User in iamhere with Wechat appid successfully then return token
 			}
+		}
+	} else {
+		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
+			//This is a registered user
 		} else {
 			validatedPass = false
 			rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
