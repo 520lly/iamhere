@@ -157,8 +157,6 @@ func ValidateAccount(c echo.Context) error {
 			//handle expired_in data from Wechat server
 			lu.UserId = woi.OpenId
 			if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
-				//This is a registered user
-			} else {
 				//Not a registered user
 				user := User{AssociatedId: woi.OpenId, Password: lu.Password}
 				if err := HandleCreateNewUser(c, &user); err != nil {
@@ -169,16 +167,18 @@ func ValidateAccount(c echo.Context) error {
 					return err
 				}
 				//Create User in iamhere with Wechat appid successfully then return token
+			} else {
+				//This is a registered user and return token
 			}
 		}
 	} else {
 		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
-			//This is a registered user
-		} else {
 			validatedPass = false
 			rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
 			RespondJ(c, RspBadRequest, rsp)
 			return NewError(ReasonAuthFailed)
+		} else {
+			//This is a registered user and return token
 		}
 	}
 	if validatedPass {
