@@ -161,12 +161,42 @@ func findAllUsers() ([]*User, error) {
 	return users, nil
 }
 
+//@name FindMsgWithID
+//@brief Get a specific Message with its ID
+func FindMsgWithID(id bson.ObjectId) (*Message, error) {
+	var msg Message
+	if err := DBCAreaMessages.Find(id).All(&msg); err != nil {
+		return nil, err
+	}
+	return &msg, nil
+}
+
+//@name FindMsgsWith1Feild
+//@brief Find messages with one specific field
 func FindMsgsWith1Feild(collection *mgo.Collection, m map[string]string) ([]*Message, error) {
 	logger.Debug("m:", m)
 	var msgs []*Message
 	if err := collection.Find(
 		bson.M{"$or": []bson.M{
 			bson.M{m["key1"]: m["value1"]},
+		},
+		}).All(&msgs); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	logger.Debug("msgs:", len(msgs))
+	return msgs, nil
+}
+
+//@name FindMsgsWith2Feild
+//@brief Find messages with 2 specific field
+func FindMsgsWith2Feild(collection *mgo.Collection, m map[string]string) ([]*Message, error) {
+	logger.Debug("m:", m)
+	var msgs []*Message
+	if err := collection.Find(
+		bson.M{"$or": []bson.M{
+			bson.M{m["key1"]: m["value1"]},
+			bson.M{m["key2"]: m["value2"]},
 		},
 		}).All(&msgs); err != nil {
 		logger.Error("err:", err.Error())

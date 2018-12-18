@@ -143,6 +143,40 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 		if msg == nil {
 			return NewError("msg is nil")
 		}
+		//Return a message with specific ID
+		if CheckBsonObjNotEmpty(msg.ID) {
+			var msg Message
+			if err := Get(DBCAreaMessages, msg.ID, msg); err != nil {
+				//Found msg in Area collection and return
+				rsp.Data = &msg
+				RespondJ(c, RspOK, rsp)
+				return nil
+			} else if err := Get(DBCOceanMessages, msg.ID, msg); err != nil {
+				//Found msg in Ocean collection and return
+				rsp.Data = &msg
+				RespondJ(c, RspOK, rsp)
+				return nil
+			}
+		} else if CheckStringNotEmpty(msg.UserID) || CheckStringNotEmpty(msg.AreaID) {
+			m := make(map[string]string)
+			if CheckStringNotEmpty(msg.UserID) {
+				m["key1"] = "userid"
+				m["value1"] = msg.UserID
+			}
+			if CheckStringNotEmpty(msg.AreaID) {
+				m["key1"] = "areaid"
+				m["value1"] = msg.AreaID
+			}
+			if msgsFound, err := FindMsgsWith2Feild(DBCAreaMessages, m); err == nil {
+				if len(msgsFound) != 0 {
+					c.Logger().Debug("Found msgs size: ", len(msgsFound))
+					rsp.Data = msgsFound
+					RespondJ(c, RspOK, rsp)
+					return nil
+				}
+			}
+		}
+
 		c.Logger().Debug("msg longitude: ", msg.Longitude, " latitude: ", msg.Latitude)
 		if !CheckInRangefloat64(msg.Latitude, LatitudeMinimum, LatitudeMaximum) {
 			return NewError("Latitude is out of range")

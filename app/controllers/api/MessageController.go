@@ -41,23 +41,6 @@ func CreateNewMessage(c echo.Context) error {
 //Handler for GetMessages
 func GetMessages(c echo.Context) error {
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
-	p := NewPath(c.Request().URL.Path)
-	m := make(map[string]string)
-	if p.HasID() {
-		//Try to find the specific message with Message ID
-		m["key1"] = "_id"
-		m["value1"] = p.GetID()
-		if msgs, err := FindMsgsWith1Feild(DBCAreaMessages, m); err == nil {
-			rsp.Data = msgs
-			RespondJ(c, RspOK, rsp)
-			return nil
-		}
-		if msgs, err := findItemWithID(DBCOceanMessages, m); err == nil {
-			rsp.Data = msgs
-			RespondJ(c, RspOK, rsp)
-			return nil
-		}
-	}
 	var msg Message
 	var debugF bool = false
 	if err := DecodeBody(c, &msg); err != nil {
@@ -77,23 +60,20 @@ func GetMessages(c echo.Context) error {
 				RespondJ(c, RspBadRequest, rsp)
 				return err
 			}
-			if len(c.QueryParam("latitude")) != 0 {
-				m["key1"] = "areaid"
-				m["value1"] = p.GetID()
-				if msgs, err := findItemWithID(DBCAccounts, m); err == nil {
-					rsp.Data = msgs
-					RespondJ(c, RspOK, rsp)
-					return nil
-				}
-				rsp.Code = RspBadRequest
-				rsp.Reason = err.Error()
-				RespondJ(c, RspBadRequest, rsp)
-				return err
+			if len(c.QueryParam("areaid")) != 0 {
+				msg.AreaID = c.QueryParam("areaid")
+			}
+			if len(c.QueryParam("userid")) != 0 {
+				msg.UserID = c.QueryParam("userid")
 			}
 			c.Logger().Debug(JsonToString(msg))
 		} else {
 			debugF = true
 		}
+	}
+	p := NewPath(c.Request().URL.Path)
+	if p.HasID() {
+		msg.ID = ConvertString2BsonObjectId(p.GetID())
 	}
 	if err := HandleGetMessages(c, &msg, debugF); err != nil {
 		return err

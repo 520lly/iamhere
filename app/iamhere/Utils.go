@@ -85,6 +85,21 @@ func GetMD5Hash(text string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
+//Check string empty
+func CheckStringNotEmpty(str string) bool {
+	return (len(str) == 0)
+}
+
+//Check bson Object empty
+func CheckBsonObjNotEmpty(b bson.ObjectId) bool {
+	return (len(b.Hex()) == 0)
+}
+
+//convert string to bson.ObjectId
+func ConvertString2BsonObjectId(str string) bson.ObjectId {
+	return bson.ObjectIdHex(str)
+}
+
 /**
 * size random size
 * kind 0    // pure number
