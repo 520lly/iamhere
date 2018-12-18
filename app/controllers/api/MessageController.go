@@ -47,7 +47,10 @@ func GetMessages(c echo.Context) error {
 		//not Response immediately and check using URL Query
 		debug := c.QueryParam("debug")
 		c.Logger().Debug("debug:", debug)
-		if CheckStringNotEmpty(debug) {
+		if len(debug) != 0 {
+			debugF = true
+			c.Logger().Debug("debugF:", debugF)
+		} else {
 			longitude := c.QueryParam("longitude")
 			if msg.Longitude, err = ConvertString2Float64(longitude); err == nil {
 				msg.Longitude = longitude
@@ -68,10 +71,7 @@ func GetMessages(c echo.Context) error {
 				c.Logger().Debug("userid:", userid)
 				msg.UserID = userid
 			}
-			c.Logger().Debug(JsonToString(msg))
-		} else {
-			debugF = true
-			c.Logger().Debug("debugF:", debugF)
+			c.Logger().Debug("msg:  ", JsonToString(msg))
 		}
 	}
 	p := NewPath(c.Request().URL.Path)

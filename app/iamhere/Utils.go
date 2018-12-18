@@ -87,12 +87,12 @@ func GetMD5Hash(text string) string {
 
 //Check string empty
 func CheckStringNotEmpty(str string) bool {
-	return (len(str) == 0)
+	return (len(str) != 0)
 }
 
 //Check bson Object empty
 func CheckBsonObjNotEmpty(b bson.ObjectId) bool {
-	return (len(b.Hex()) == 0)
+	return (len(b.Hex()) != 0)
 }
 
 //convert string to bson.ObjectId
