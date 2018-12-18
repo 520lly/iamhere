@@ -60,11 +60,15 @@ func GetMessages(c echo.Context) error {
 				RespondJ(c, RspBadRequest, rsp)
 				return err
 			}
-			if len(c.QueryParam("areaid")) != 0 {
-				msg.AreaID = c.QueryParam("areaid")
+			areaid := c.QueryParam("areaid")
+			if len(areaid) != 0 {
+				c.Logger().Debug("areaid:", areaid)
+				msg.AreaID = areaid
 			}
-			if len(c.QueryParam("userid")) != 0 {
-				msg.UserID = c.QueryParam("userid")
+			userid := c.QueryParam("userid")
+			if len(userid) != 0 {
+				c.Logger().Debug("userid:", userid)
+				msg.UserID = userid
 			}
 			c.Logger().Debug(JsonToString(msg))
 		} else {
