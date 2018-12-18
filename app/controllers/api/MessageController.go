@@ -75,7 +75,7 @@ func GetMessages(c echo.Context) error {
 		}
 	}
 	p := NewPath(c.Request().URL.Path)
-	c.Logger().Debug("p.HasID:", p.HasID())
+	c.Logger().Debug("p.HasID:", p.HasID(), "   p.GetID: ", p.GetID())
 	if p.HasID() {
 		msg.ID = ConvertString2BsonObjectId(p.GetID())
 	}
