@@ -47,18 +47,16 @@ func GetMessages(c echo.Context) error {
 		//not Response immediately and check using URL Query
 		debug := c.QueryParam("debug")
 		c.Logger().Debug("debug:", debug)
-		if len(debug) == 0 {
-			if msg.Longitude, err = ConvertString2Float64(c.QueryParam("longitude")); err != nil {
-				rsp.Code = RspBadRequest
-				rsp.Reason = err.Error()
-				RespondJ(c, RspBadRequest, rsp)
-				return err
+		if CheckStringNotEmpty(debug) {
+			longitude := c.QueryParam("longitude")
+			if msg.Longitude, err = ConvertString2Float64(longitude); err == nil {
+				msg.Longitude = longitude
+				c.Logger().Debug("longtitude:", longtitude)
 			}
-			if msg.Latitude, err = ConvertString2Float64(c.QueryParam("latitude")); err != nil {
-				rsp.Code = RspBadRequest
-				rsp.Reason = err.Error()
-				RespondJ(c, RspBadRequest, rsp)
-				return err
+			latitude := c.QueryParam("latitude")
+			if msg.Latitude, err = ConvertString2Float64(latitude); err == nil {
+				msg.Latitude = latitude
+				c.Logger().Debug("latitude:", latitude)
 			}
 			areaid := c.QueryParam("areaid")
 			if len(areaid) != 0 {
@@ -73,9 +71,11 @@ func GetMessages(c echo.Context) error {
 			c.Logger().Debug(JsonToString(msg))
 		} else {
 			debugF = true
+			c.Logger().Debug("debugF:", debugF)
 		}
 	}
 	p := NewPath(c.Request().URL.Path)
+	c.Logger().Debug("p.HasID:", p.HasID())
 	if p.HasID() {
 		msg.ID = ConvertString2BsonObjectId(p.GetID())
 	}

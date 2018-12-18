@@ -122,6 +122,7 @@ func HandleCreateNewMessage(c echo.Context, msg *Message) error {
 }
 
 func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
+	c.Logger().Debug("msg:", msg, "  debug:", debug)
 	var msgs []*Message
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	if debug {
