@@ -96,9 +96,9 @@ func CheckBsonObjNotEmpty(b bson.ObjectId) bool {
 }
 
 //convert string to bson.ObjectId
-func ConvertString2BsonObjectId(str string) bson.ObjectId {
-	return bson.ObjectIdHex(str)
-}
+//func ConvertString2BsonObjectId(str string) bson.ObjectId {
+//return bson.ObjectIdHex(str)
+//}
 
 /**
 * size random size
