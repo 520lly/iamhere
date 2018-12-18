@@ -40,7 +40,7 @@ func CreateNewMessage(c echo.Context) error {
 
 //Handler for GetMessages
 func GetMessages(c echo.Context) error {
-	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
+	//rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	var msg Message
 	var debugF bool = false
 	if err := DecodeBody(c, &msg); err != nil {
@@ -51,15 +51,9 @@ func GetMessages(c echo.Context) error {
 			debugF = true
 			c.Logger().Debug("debugF:", debugF)
 		} else {
-			longitude := c.QueryParam("longitude")
-			if msg.Longitude, err = ConvertString2Float64(longitude); err == nil {
-				msg.Longitude = longitude
-				c.Logger().Debug("longtitude:", longtitude)
+			if msg.Longitude, err = ConvertString2Float64(c.QueryParam("longitude")); err == nil {
 			}
-			latitude := c.QueryParam("latitude")
-			if msg.Latitude, err = ConvertString2Float64(latitude); err == nil {
-				msg.Latitude = latitude
-				c.Logger().Debug("latitude:", latitude)
+			if msg.Latitude, err = ConvertString2Float64(c.QueryParam("latitude")); err == nil {
 			}
 			areaid := c.QueryParam("areaid")
 			if len(areaid) != 0 {
