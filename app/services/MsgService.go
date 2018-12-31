@@ -37,7 +37,12 @@ func HandleCreateNewMessage(c echo.Context, msg *Message) error {
 			return NewError("Longitude is out of range")
 		} else if msg.ExpiryTime == 0 {
 			msg.ExpiryTime = CreateTimeStampUnix()
+		} else if msg.Color == 0 {
+			msg.Color = Black
+		} else if msg.Available {
+			msg.Available = CanBeSeen
 		}
+
 		msg.TimeStamp = CreateTimeStampUnix()
 		msg.Location.Coordinates = []float64{msg.Longitude, msg.Latitude}
 		msg.Location.Type = "Point"
@@ -135,8 +140,8 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 			RespondJ(c, RspInternalServerError, rsp)
 			return nil
 		} else {
-			c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
-			rsp := &Response{RspOK, ReasonSuccess, msgs, len(msgs)}
+			c.Logger().Debug("Failed find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
+			rsp := &Response{RspBadRequest, ReasonOperationFailed, nil, 0}
 			RespondJ(c, RspOK, rsp)
 			return nil
 		}
@@ -146,13 +151,17 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 		}
 		//Return a message with specific ID
 		if CheckBsonObjNotEmpty(msg.ID) {
-			var msg Message
-			if err := Get(DBCAreaMessages, msg.ID, msg); err != nil {
+			//var m Message
+			if m := GetOneItem(DBCAreaMessages, msg.ID, Message{}); m != nil {
+				c.Logger().Debug("m:", m)
 				//Found msg in Area collection and return
-				rsp.Data = &msg
-				RespondJ(c, RspOK, rsp)
-				return nil
-			} else if err := Get(DBCOceanMessages, msg.ID, msg); err != nil {
+				//rsp.Data = &m
+				//RespondJ(c, RspOK, rsp)
+				//return nil
+			}
+			//if m, err := GetOneItem(DBCOceanMessages, msg.ID); m != nil && err != nil {
+			if m := GetOneItem(DBCAreaMessages, msg.ID, Message{}); m != nil {
+				c.Logger().Debug("m:", msg)
 				//Found msg in Ocean collection and return
 				rsp.Data = &msg
 				RespondJ(c, RspOK, rsp)

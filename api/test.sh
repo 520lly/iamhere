@@ -9,16 +9,16 @@ __version__=0.1
 #set -x                     #print every excution log
 set -e                     #exit when error hanppens
 
-IP=35.187.154.122
+#IP=35.187.154.122
 #IP=35.187.231.228
-#IP=localhost
+IP=localhost
 PORT=9090
-data='{"areaid":"test","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000}'
+data='{"areaid":"test","userid":"wang","content":"This is a test messages","userdefaddr":"test","expirytime":1535454597,"latitude":39.7039399637,"longitude":121.1754884604,"altitude":1000, "color"::1}'
 
-#curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123}' -X POST "http://$IP:8080/messages/"
-#curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123}' -X GET "http://$IP:8080/messages/"
-curl -X GET "http://$IP:$PORT/api/v1/accounts?debug=1" | jq
+curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123, "color":1}' -X POST "http://$IP:8080/messages"
 exit
+#curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":123}' -X GET "http://$IP:8080/messages/"
+#curl -X GET "http://$IP:$PORT/api/v1/accounts?debug=1" | jq
 #curl -X DELETE "http://$IP:8080/areas/${1:-""}"
 #curl --data '{"areaid":"test","userid":"test","content":"This is a test messages","userdefaddr":"test","expirytime":123,"latitude":9.7039399637,"longitude":121.1754884604,"altitude":123}' -X GET "http://$IP:8080/areas/"
 #curl -X GET "http://$IP:8080/messages/?longitude=121.1754884604"
@@ -28,7 +28,7 @@ exit
 #curl --data '{"longitude":39, "latitude":123}' -X GET "http://$IP:8080/messages/?key=abc123&&debug=1" | jq
 #curl -X GET "http://$IP:8080/messages/?key=abc123&debug=1"
 #curl -X GET "http://$IP:8080/areas/?key=abc123&debug=0"
-curl -X GET "http://$IP:8090/api/v1/trails"
+#curl -X GET "http://$IP:8090/api/v1/trails"
 #curl -X GET "http://$IP:8080/areas/?key=abc123&category=16"
 #curl --data '{"name":"雪窦山 徐凫岩瀑布","description":"喜欢瀑布下沐浴水汽的感觉","address1":"浙江省宁波市奉化区","address2":"","category":16,"type":0,"latitude":29.7039399637,"longitude":121.1754884604,"altitude":0,"radius":50.00}' -X POST http://$IP:8080/areas/?key=abc123
 #curl -X GET "http://$IP:8080/messages/${1:-""}/?key=abc123"

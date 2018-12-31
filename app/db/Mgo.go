@@ -398,7 +398,32 @@ func Err(err error) bool {
 }
 
 func Get(collection *mgo.Collection, id bson.ObjectId, i interface{}) error {
-	return collection.FindId(id).One(i)
+	if c, ok := i.(Message); ok {
+		logger.Debug("c = ", c)
+		var msg Message
+		collection.FindId(id).One(&msg)
+		i = &msg
+		return nil
+	}
+	return NewError("nil")
+}
+
+func GetOneItem(collection *mgo.Collection, id bson.ObjectId, i interface{}) interface{} {
+	var ret interface{}
+	switch i.(type) {
+	case Message:
+		var msg Message
+		collection.FindId(id).One(msg)
+		logger.Debug("msg:", msg)
+		ret = &msg
+		logger.Debug("msg:", ret)
+	case User:
+		var user User
+		collection.FindId(id).One(&user)
+		ret = &user
+		logger.Debug("user:", ret)
+	}
+	return ret
 }
 
 // remove duplicated data via field

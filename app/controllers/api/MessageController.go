@@ -52,8 +52,10 @@ func GetMessages(c echo.Context) error {
 			c.Logger().Debug("debugF:", debugF)
 		} else {
 			if msg.Longitude, err = ConvertString2Float64(c.QueryParam("longitude")); err == nil {
+				c.Logger().Debug("longitude:", msg.Longitude)
 			}
 			if msg.Latitude, err = ConvertString2Float64(c.QueryParam("latitude")); err == nil {
+				c.Logger().Debug("latitude:", msg.Latitude)
 			}
 			areaid := c.QueryParam("areaid")
 			if len(areaid) != 0 {
@@ -65,14 +67,13 @@ func GetMessages(c echo.Context) error {
 				c.Logger().Debug("userid:", userid)
 				msg.UserID = userid
 			}
-			c.Logger().Debug("msg:  ", JsonToString(msg))
 		}
 	}
-	p := NewPath(c.Request().URL.Path)
-	c.Logger().Debug("p.HasID:", p.HasID(), "   p.GetID: ", p.GetID())
-	if p.HasID() {
-		//msg.ID = ConvertString2BsonObjectId(p.GetID())
+	id := c.Param("id")
+	if CheckStringNotEmpty(id) {
+		msg.ID = StringToBson(id)
 	}
+	c.Logger().Debug("msg:  ", JsonToString(msg))
 	if err := HandleGetMessages(c, &msg, debugF); err != nil {
 		return err
 	}
