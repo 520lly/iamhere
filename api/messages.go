@@ -46,6 +46,8 @@ type Message struct {
 	TimeStamp   int64         `json:"timestamp"`
 	LikeCount   int32         `json:"likecount"`
 	Recommend   bool          `json:"recommend"`
+	Color       int32         `json:color`
+	Available   bool          `json:available`
 }
 
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
