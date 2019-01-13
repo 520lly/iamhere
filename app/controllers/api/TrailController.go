@@ -17,7 +17,8 @@ func HandleTrail(e *echo.Echo) {
 func GetTrailMessages(c echo.Context) error {
 	var msg Message
 	debugF := true
-	if err := HandleGetMessages(c, &msg, debugF); err != nil {
+	var sizeLimit = Config.ApiConfig.RandomItemLimit
+	if err := HandleGetMessages(c, &msg, debugF, 0, sizeLimit); err != nil {
 		return err
 	}
 	return nil

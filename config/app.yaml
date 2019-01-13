@@ -14,7 +14,8 @@ apiconfig:
    prefix:         "/api"
    version:        "/v1"
    secret:         "V85ZzBeTnzpsHyjQX4zukbQ8qqtju9y2aDM55VWxAH9Qop19poekx3xkcDVvrD0y"
-   randomItemLimit: 10
+   randomItemLimit: 20
+   mixacessDistanceLimit: 2000 #2km
    bodySizeLimit:  "1K"
    accounts:
        group:      "/accounts"

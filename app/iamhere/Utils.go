@@ -42,7 +42,7 @@ func ConvertString2Float64(s string) (float64, error) {
 	var ret float64 = 0
 	if len(s) != 0 {
 		ret, err := strconv.ParseFloat(s, 64)
-		if err != nil {
+		if err == nil {
 			return ret, err
 		}
 	} else {
@@ -93,6 +93,11 @@ func CheckStringNotEmpty(str string) bool {
 //Check bson Object empty
 func CheckBsonObjNotEmpty(b bson.ObjectId) bool {
 	return (len(b.Hex()) != 0)
+}
+
+//Check size limit validate
+func CheckSizeLimitValidate(size int) bool {
+	return (size > 0 && size <= Config.ApiConfig.RandomItemLimit)
 }
 
 //convert string to bson.ObjectId

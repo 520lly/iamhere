@@ -126,22 +126,21 @@ func HandleCreateNewMessage(c echo.Context, msg *Message) error {
 	return nil
 }
 
-func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
-	c.Logger().Debug("msg:", msg, "  debug:", debug)
+func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size int) error {
+	c.Logger().Debug("msg:", msg, "  debug:", debug, "  size:", size, "  page:", page)
 	var msgs []*Message
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	if debug {
 		//Found up to 10 ocean messages
-		msgs = GetRandomMessages(DBCOceanMessages, Config.ApiConfig.RandomItemLimit)
+		msgs = GetRandomMessages(DBCOceanMessages, size)
 		if msgs == nil {
-			c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages failed")
-			rsp.Code = RspInternalServerError
-			rsp.Reason = ReasonOperationFailed
+			c.Logger().Debug("Find up to ", size, " ocean messages failed")
+			rsp := &Response{RspBadRequest, ReasonOperationFailed, nil, 0}
 			RespondJ(c, RspInternalServerError, rsp)
 			return nil
 		} else {
-			c.Logger().Debug("Failed find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages Success")
-			rsp := &Response{RspBadRequest, ReasonOperationFailed, nil, 0}
+			c.Logger().Debug("Failed find up to ", size, " ocean messages Success")
+			rsp := &Response{RspOK, ReasonSuccess, &msgs, len(msgs)}
 			RespondJ(c, RspOK, rsp)
 			return nil
 		}
@@ -149,38 +148,55 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool) error {
 		if msg == nil {
 			return NewError("msg is nil")
 		}
-		//Return a message with specific ID
+		//Return a message with specific ID (Message ID comes first than location)
 		if CheckBsonObjNotEmpty(msg.ID) {
 			//var m Message
 			if m := GetOneItem(DBCAreaMessages, msg.ID, Message{}); m != nil {
 				c.Logger().Debug("m:", m)
 				//Found msg in Area collection and return
-				//rsp.Data = &m
-				//RespondJ(c, RspOK, rsp)
-				//return nil
+				rsp := &Response{RspOK, ReasonSuccess, &m, 1}
+				RespondJ(c, RspOK, rsp)
 			}
-			//if m, err := GetOneItem(DBCOceanMessages, msg.ID); m != nil && err != nil {
-			if m := GetOneItem(DBCAreaMessages, msg.ID, Message{}); m != nil {
+			if m := GetOneItem(DBCOceanMessages, msg.ID, Message{}); m != nil {
 				c.Logger().Debug("m:", msg)
 				//Found msg in Ocean collection and return
-				rsp.Data = &msg
+				rsp := &Response{RspOK, ReasonSuccess, &m, 1}
 				RespondJ(c, RspOK, rsp)
 				return nil
 			}
 		} else if CheckStringNotEmpty(msg.UserID) || CheckStringNotEmpty(msg.AreaID) {
-			m := make(map[string]string)
-			if CheckStringNotEmpty(msg.UserID) {
-				m["key1"] = "userid"
-				m["value1"] = msg.UserID
-			}
-			if CheckStringNotEmpty(msg.AreaID) {
-				m["key1"] = "areaid"
-				m["value1"] = msg.AreaID
-			}
-			if msgsFound, err := FindMsgsWith2Feild(DBCAreaMessages, m); err == nil {
-				if len(msgsFound) != 0 {
-					c.Logger().Debug("Found msgs size: ", len(msgsFound))
-					rsp.Data = msgsFound
+			var err error
+			if CheckStringNotEmpty(msg.UserID) && CheckStringNotEmpty(msg.AreaID) {
+				m := make(map[string]string)
+				if CheckStringNotEmpty(msg.UserID) {
+					m["key1"] = "userid"
+					m["value1"] = msg.UserID
+				}
+				if CheckStringNotEmpty(msg.AreaID) {
+					m["key2"] = "areaid"
+					m["value2"] = msg.AreaID
+				}
+
+				if msgs, err = FindMsgsWith2Feild(DBCAreaMessages, m, page, size); err == nil {
+					c.Logger().Debug("Found msgs size: ", len(msgs))
+					rsp.Data = msgs
+					rsp.Count = len(msgs)
+					RespondJ(c, RspOK, rsp)
+					return nil
+				}
+			} else if CheckStringNotEmpty(msg.UserID) {
+				if msgs, err = FindMsgsWith1Feild(DBCAreaMessages, "userid", msg.UserID, page, size); err == nil {
+					c.Logger().Debug("Found msgs size: ", len(msgs))
+					rsp.Data = msgs
+					rsp.Count = len(msgs)
+					RespondJ(c, RspOK, rsp)
+					return nil
+				}
+			} else if CheckStringNotEmpty(msg.AreaID) {
+				if msgs, err = FindMsgsWith1Feild(DBCAreaMessages, "areaid", msg.AreaID, page, size); err == nil {
+					c.Logger().Debug("Found msgs size: ", len(msgs))
+					rsp.Data = msgs
+					rsp.Count = len(msgs)
 					RespondJ(c, RspOK, rsp)
 					return nil
 				}

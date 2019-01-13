@@ -16,11 +16,12 @@ type Configuration struct {
 	}
 
 	ApiConfig struct {
-		Prefix          string
-		Version         string
-		Secret          string
-		RandomItemLimit int
-		BodySizeLimit   string
+		Prefix                string
+		Version               string
+		Secret                string
+		RandomItemLimit       int
+		MixAcessDistanceLimit int
+		BodySizeLimit         string
 
 		Accounts struct {
 			Group string

@@ -43,38 +43,59 @@ func GetMessages(c echo.Context) error {
 	//rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	var msg Message
 	var debugF bool = false
-	if err := DecodeBody(c, &msg); err != nil {
-		//not Response immediately and check using URL Query
-		debug := c.QueryParam("debug")
-		c.Logger().Debug("debug:", debug)
-		if len(debug) != 0 {
-			debugF = true
-			c.Logger().Debug("debugF:", debugF)
-		} else {
-			if msg.Longitude, err = ConvertString2Float64(c.QueryParam("longitude")); err == nil {
+	var sizeLimit = Config.ApiConfig.RandomItemLimit
+	var page = 0
+	var err error
+	//if err := DecodeBody(c, &msg); err != nil {
+	//not Response immediately and check using URL Query
+	debug := c.QueryParam("debug")
+	c.Logger().Debug("debug:", debug)
+	if len(debug) != 0 {
+		debugF = true
+		c.Logger().Debug("debugF:", debugF)
+	} else {
+		long := c.QueryParam("longitude")
+		c.Logger().Debug("longitude:", long)
+		if CheckStringNotEmpty(long) {
+			if msg.Longitude, err = ConvertString2Float64(long); err == nil {
 				c.Logger().Debug("longitude:", msg.Longitude)
 			}
-			if msg.Latitude, err = ConvertString2Float64(c.QueryParam("latitude")); err == nil {
+		} else {
+			c.Logger().Debug("err:", err.Error())
+			msg.Longitude = LongitudeMinimum
+		}
+		lat := c.QueryParam("latitude")
+		if CheckStringNotEmpty(lat) {
+			if msg.Latitude, err = ConvertString2Float64(lat); err == nil {
 				c.Logger().Debug("latitude:", msg.Latitude)
 			}
-			areaid := c.QueryParam("areaid")
-			if len(areaid) != 0 {
-				c.Logger().Debug("areaid:", areaid)
-				msg.AreaID = areaid
-			}
-			userid := c.QueryParam("userid")
-			if len(userid) != 0 {
-				c.Logger().Debug("userid:", userid)
-				msg.UserID = userid
-			}
+		} else {
+			c.Logger().Debug("err:", err.Error())
+			msg.Latitude = LatitudeMinimum
 		}
+		areaid := c.QueryParam("areaid")
+		if len(areaid) != 0 {
+			c.Logger().Debug("areaid:", areaid)
+			msg.AreaID = areaid
+		}
+		userid := c.QueryParam("userid")
+		if len(userid) != 0 {
+			c.Logger().Debug("userid:", userid)
+			msg.UserID = userid
+		}
+		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
+		if !CheckSizeLimitValidate(sizeLimit) {
+			sizeLimit = Config.ApiConfig.RandomItemLimit
+		}
+		page, _ = strconv.Atoi(c.QueryParam("page"))
 	}
+	//}
 	id := c.Param("id")
 	if CheckStringNotEmpty(id) {
 		msg.ID = StringToBson(id)
 	}
 	c.Logger().Debug("msg:  ", JsonToString(msg))
-	if err := HandleGetMessages(c, &msg, debugF); err != nil {
+	if err := HandleGetMessages(c, &msg, debugF, page, sizeLimit); err != nil {
 		return err
 	}
 	return nil

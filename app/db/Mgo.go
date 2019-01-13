@@ -171,16 +171,65 @@ func FindMsgWithID(id bson.ObjectId) (*Message, error) {
 	return &msg, nil
 }
 
+//@name FindMsgsWithGeoLocation
+//@brief Find messages with one specific geo location
+func FindMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, size int) ([]*Message, error) {
+	var msgs []*Message
+	if err := collection.Pipe([]bson.M{
+		bson.M{
+			"location": bson.M{
+				"$nearSphere": bson.M{
+					"$geometry": bson.M{
+						"Type":        "Point",
+						"coordinates": []float64{geo.Coordinates[0], geo.Coordinates[1]},
+					},
+					"$maxDistance": Config.ApiConfig.MixAcessDistanceLimit,
+				},
+			},
+		},
+		bson.M{
+			"$match": bson.M{
+				"available": true},
+		},
+		bson.M{
+			"$sort": bson.M{"timestamp": 1},
+		},
+		bson.M{
+			"$skip": Config.ApiConfig.RandomItemLimit * page,
+		},
+		bson.M{
+			"$sample": bson.M{"size": size},
+		},
+	}).All(&msgs); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	logger.Debug("msgs:", len(msgs))
+	return msgs, nil
+}
+
 //@name FindMsgsWith1Feild
 //@brief Find messages with one specific field
-func FindMsgsWith1Feild(collection *mgo.Collection, m map[string]string) ([]*Message, error) {
-	logger.Debug("m:", m)
+func FindMsgsWith1Feild(collection *mgo.Collection, key string, value string, page int, size int) ([]*Message, error) {
+	logger.Debug("key:[", key, "]", "value:[", value, "]")
 	var msgs []*Message
-	if err := collection.Find(
-		bson.M{"$or": []bson.M{
-			bson.M{m["key1"]: m["value1"]},
+	if err := collection.Pipe([]bson.M{
+		bson.M{
+			"$match": bson.M{
+				key:         value,
+				"available": true,
+			},
 		},
-		}).All(&msgs); err != nil {
+		bson.M{
+			"$sort": bson.M{"timestamp": 1},
+		},
+		bson.M{
+			"$skip": Config.ApiConfig.RandomItemLimit * page,
+		},
+		bson.M{
+			"$sample": bson.M{"size": size},
+		},
+	}).All(&msgs); err != nil {
 		logger.Error("err:", err.Error())
 		return nil, err
 	}
@@ -190,15 +239,27 @@ func FindMsgsWith1Feild(collection *mgo.Collection, m map[string]string) ([]*Mes
 
 //@name FindMsgsWith2Feild
 //@brief Find messages with 2 specific field
-func FindMsgsWith2Feild(collection *mgo.Collection, m map[string]string) ([]*Message, error) {
-	logger.Debug("m:", m)
+func FindMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page int, size int) ([]*Message, error) {
+	logger.Debug("m:", m, "  size:", size)
 	var msgs []*Message
-	if err := collection.Find(
-		bson.M{"$or": []bson.M{
-			bson.M{m["key1"]: m["value1"]},
-			bson.M{m["key2"]: m["value2"]},
+	if err := collection.Pipe([]bson.M{
+		bson.M{
+			"$match": bson.M{
+				m["key1"]:   m["value1"],
+				m["key2"]:   m["value2"],
+				"available": true,
+			},
 		},
-		}).All(&msgs); err != nil {
+		bson.M{
+			"$sort": bson.M{"timestamp": 1},
+		},
+		bson.M{
+			"$skip": Config.ApiConfig.RandomItemLimit * page,
+		},
+		bson.M{
+			"$sample": bson.M{"size": size},
+		},
+	}).All(&msgs); err != nil {
 		logger.Error("err:", err.Error())
 		return nil, err
 	}
