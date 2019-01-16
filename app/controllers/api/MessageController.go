@@ -61,7 +61,6 @@ func GetMessages(c echo.Context) error {
 				c.Logger().Debug("longitude:", msg.Longitude)
 			}
 		} else {
-			c.Logger().Debug("err:", err.Error())
 			msg.Longitude = LongitudeMinimum
 		}
 		lat := c.QueryParam("latitude")
@@ -70,7 +69,6 @@ func GetMessages(c echo.Context) error {
 				c.Logger().Debug("latitude:", msg.Latitude)
 			}
 		} else {
-			c.Logger().Debug("err:", err.Error())
 			msg.Latitude = LatitudeMinimum
 		}
 		areaid := c.QueryParam("areaid")
