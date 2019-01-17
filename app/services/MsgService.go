@@ -166,6 +166,12 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 			}
 		} else if CheckStringNotEmpty(msg.UserID) || CheckStringNotEmpty(msg.AreaID) {
 			var err error
+			var dbcn DBCP
+			if msg.AreaID == "Ocean" {
+				dbcn = DBCOceanMessages
+			} else {
+				dbcn = DBCAreaMessages
+			}
 			if CheckStringNotEmpty(msg.UserID) && CheckStringNotEmpty(msg.AreaID) {
 				m := make(map[string]string)
 				if CheckStringNotEmpty(msg.UserID) {
@@ -176,7 +182,6 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					m["key2"] = "areaid"
 					m["value2"] = msg.AreaID
 				}
-
 				if msgs, err = FindMsgsWith2Feild(DBCAreaMessages, m, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
@@ -185,7 +190,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					return nil
 				}
 			} else if CheckStringNotEmpty(msg.UserID) {
-				if msgs, err = FindMsgsWith1Feild(DBCAreaMessages, "userid", msg.UserID, page, size); err == nil {
+				if msgs, err = FindMsgsWith1Feild(dbcn, "userid", msg.UserID, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -193,7 +198,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					return nil
 				}
 			} else if CheckStringNotEmpty(msg.AreaID) {
-				if msgs, err = FindMsgsWith1Feild(DBCAreaMessages, "areaid", msg.AreaID, page, size); err == nil {
+				if msgs, err = FindMsgsWith1Feild(dbcn, "areaid", msg.AreaID, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -202,7 +207,6 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 				}
 			}
 		}
-
 		c.Logger().Debug("msg longitude: ", msg.Longitude, " latitude: ", msg.Latitude)
 		if !CheckInRangefloat64(msg.Latitude, LatitudeMinimum, LatitudeMaximum) {
 			return NewError("Latitude is out of range")

@@ -16,6 +16,10 @@ const (
 	QueryOperationOR  string = "$or"  //or Operation
 )
 
+type (
+	DBCP *mgo.Collection
+)
+
 // database connection
 var DBSession *mgo.Session
 var DBQuery *mgo.Query

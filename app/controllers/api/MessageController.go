@@ -83,8 +83,11 @@ func GetMessages(c echo.Context) error {
 			msg.UserID = userid
 		} else {
 			var jwtConfig middleware.JWTConfig
-			msg.UserID = fmt.Sprintf("%v", c.Get(jwtConfig.ContextKey))
-			c.Logger().Debug("msg.UserID :", msg.UserID)
+			uid := fmt.Sprintf("%v", c.Get(jwtConfig.ContextKey))
+			if CheckStringNotEmpty(uid) {
+				msg.UserID = uid
+				c.Logger().Debug("msg.UserID :", msg.UserID)
+			}
 		}
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {
