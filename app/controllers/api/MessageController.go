@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 
 	. "github.com/520lly/iamhere/app/iamhere"
@@ -80,6 +81,10 @@ func GetMessages(c echo.Context) error {
 		if len(userid) != 0 {
 			c.Logger().Debug("userid:", userid)
 			msg.UserID = userid
+		} else {
+			var jwtConfig middleware.JWTConfig
+			msg.UserID = fmt.Sprintf("%v", c.Get(jwtConfig.ContextKey))
+			c.Logger().Debug("msg.UserID :", msg.UserID)
 		}
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {
