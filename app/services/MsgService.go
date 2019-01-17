@@ -168,6 +168,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 			var err error
 			var dbcn DBCP
 			if msg.AreaID == "Ocean" {
+				c.Logger().Debug("Ocean dbcn:", dbcn)
 				dbcn = DBCOceanMessages
 			} else {
 				dbcn = DBCAreaMessages
