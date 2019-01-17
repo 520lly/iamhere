@@ -36,5 +36,6 @@ type Message struct {
 	LikeCount   string           `json:"likecount"`
 	Recommend   string           `json:"recommend"`
 	Color       ColorMotion      `json:color`
-	Available   AvailableLocally `json:available` //this message will be available when other user is in the area
+	Available   AvailableLocally `json:available`   //this message will be available when other user is in the area
+	LimitAccess AvailableLocally `json:limitaccess` //this message will be limited to access when other user is in the area the defalue is false
 }

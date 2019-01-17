@@ -197,7 +197,8 @@ func ValidateAccount(c echo.Context) error {
 			return err
 		}
 		rsp := &Response{RspOK, ReasonSuccess, map[string]string{
-			"token": t,
+			"token":  t,
+			"userid": lu.UserId,
 		}, 0}
 		RespondJ(c, RspOK, rsp)
 		return nil
