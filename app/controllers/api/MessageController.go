@@ -33,6 +33,13 @@ func CreateNewMessage(c echo.Context) error {
 		RespondJ(c, RspBadRequest, rsp)
 		return err
 	}
+
+	user := c.Get("user").(*jwt.Token)
+	if user != nil {
+		claims := user.Claims.(jwt.MapClaims)
+		c.Logger().Debug("msg.UserID :", claims["name"])
+		msg.UserID = claims["name"].(string)
+	}
 	c.Logger().Debug(JsonToString(msg))
 	if err := HandleCreateNewMessage(c, &msg); err != nil {
 		return err
@@ -83,14 +90,12 @@ func GetMessages(c echo.Context) error {
 			c.Logger().Debug("userid:", userid)
 			msg.UserID = userid
 		} else {
-			user := c.Get("user").(*jwt.Token)
-			if user != nil {
-				claims := user.Claims.(jwt.MapClaims)
-				c.Logger().Debug("msg.UserID :", claims["name"])
-				msg.UserID = claims["name"].(string)
-			}
-			//userInfo := fmt.Sprintf("%v", c.Get("user"))
-			//c.Logger().Debug("userInfo: ", userInfo)
+			//user := c.Get("user").(*jwt.Token)
+			//if user != nil {
+			//claims := user.Claims.(jwt.MapClaims)
+			//c.Logger().Debug("msg.UserID :", claims["name"])
+			//msg.UserID = claims["name"].(string)
+			//}
 		}
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {
