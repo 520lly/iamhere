@@ -166,13 +166,6 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 			}
 		} else if CheckStringNotEmpty(msg.UserID) || CheckStringNotEmpty(msg.AreaID) {
 			var err error
-			var dbcn DBCP
-			if msg.AreaID == "Ocean" {
-				c.Logger().Debug("Ocean dbcn:", dbcn)
-				dbcn = DBCOceanMessages
-			} else {
-				dbcn = DBCAreaMessages
-			}
 			if CheckStringNotEmpty(msg.UserID) && CheckStringNotEmpty(msg.AreaID) {
 				m := make(map[string]string)
 				if CheckStringNotEmpty(msg.UserID) {
@@ -183,7 +176,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					m["key2"] = "areaid"
 					m["value2"] = msg.AreaID
 				}
-				if msgs, err = FindMsgsWith2Feild(DBCAreaMessages, m, page, size); err == nil {
+				if msgs, err = FindMsgsWith2Feild(msg.AreaID, m, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -191,7 +184,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					return nil
 				}
 			} else if CheckStringNotEmpty(msg.UserID) {
-				if msgs, err = FindMsgsWith1Feild(dbcn, "userid", msg.UserID, page, size); err == nil {
+				if msgs, err = FindMsgsWith1Feild(msg.AreaID, "userid", msg.UserID, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -199,7 +192,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					return nil
 				}
 			} else if CheckStringNotEmpty(msg.AreaID) {
-				if msgs, err = FindMsgsWith1Feild(dbcn, "areaid", msg.AreaID, page, size); err == nil {
+				if msgs, err = FindMsgsWith1Feild(msg.AreaID, "areaid", msg.AreaID, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -217,7 +210,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 
 		if area := FindAreaWithLocation(c, msg.Longitude, msg.Latitude); area != nil {
 			//this message belong to a specific area
-			//Found up to random item limit ocean messages
+			//Found up to random item limit area messages
 			msgs = GetSpecifiedLocationMessages(DBCAreaMessages, msg.Longitude, msg.Latitude, area.Radius, Config.ApiConfig.RandomItemLimit)
 			if msgs == nil {
 				c.Logger().Debug("Find up to ", Config.ApiConfig.RandomItemLimit, " ocean messages failed")

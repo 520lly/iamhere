@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"fmt"
+	//"fmt"
 	"strconv"
 
 	. "github.com/520lly/iamhere/app/iamhere"
 	. "github.com/520lly/iamhere/app/modules"
 	. "github.com/520lly/iamhere/app/services"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -82,12 +83,14 @@ func GetMessages(c echo.Context) error {
 			c.Logger().Debug("userid:", userid)
 			msg.UserID = userid
 		} else {
-			var jwtConfig middleware.JWTConfig
-			uid := fmt.Sprintf("%v", c.Get(jwtConfig.ContextKey))
-			if CheckStringNotEmpty(uid) {
-				msg.UserID = uid
-				c.Logger().Debug("msg.UserID :", msg.UserID)
+			user := c.Get("user").(*jwt.Token)
+			if user != nil {
+				claims := user.Claims.(jwt.MapClaims)
+				c.Logger().Debug("msg.UserID :", claims["name"])
+				msg.UserID = claims["name"].(string)
 			}
+			//userInfo := fmt.Sprintf("%v", c.Get("user"))
+			//c.Logger().Debug("userInfo: ", userInfo)
 		}
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {

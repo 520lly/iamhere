@@ -177,7 +177,15 @@ func FindMsgWithID(id bson.ObjectId) (*Message, error) {
 
 //@name FindMsgsWithGeoLocation
 //@brief Find messages with one specific geo location
-func FindMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, size int) ([]*Message, error) {
+func FindMsgsWithGeoLocation(dbcName string, geo GeoJson, page int, size int) ([]*Message, error) {
+	if dbcName == "Ocean" {
+		return findMsgsWithGeoLocation(DBCOceanMessages, geo, page, size)
+	} else {
+		return findMsgsWithGeoLocation(DBCAreaMessages, geo, page, size)
+	}
+}
+
+func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, size int) ([]*Message, error) {
 	var msgs []*Message
 	if err := collection.Pipe([]bson.M{
 		bson.M{
@@ -216,15 +224,23 @@ func FindMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, 
 
 //@name FindMsgsWith1Feild
 //@brief Find messages with one specific field
-func FindMsgsWith1Feild(collection *mgo.Collection, key string, value string, page int, size int) ([]*Message, error) {
+func FindMsgsWith1Feild(dbcName string, key string, value string, page int, size int) ([]*Message, error) {
+	if dbcName == "Ocean" {
+		return findMsgsWith1Feild(DBCOceanMessages, key, value, page, size)
+	} else {
+		return findMsgsWith1Feild(DBCAreaMessages, key, value, page, size)
+	}
+}
+
+func findMsgsWith1Feild(collection *mgo.Collection, key string, value string, page int, size int) ([]*Message, error) {
 	logger.Debug("key:[", key, "]", "value:[", value, "]")
 	var msgs []*Message
 	if err := collection.Pipe([]bson.M{
 		bson.M{
 			"$match": bson.M{
-				key:           value,
-				"available":   false,
-				"limitaccess": false,
+				key: value,
+				//"available":   false,
+				//"limitaccess": false,
 			},
 		},
 		bson.M{
@@ -246,7 +262,15 @@ func FindMsgsWith1Feild(collection *mgo.Collection, key string, value string, pa
 
 //@name FindMsgsWith2Feild
 //@brief Find messages with 2 specific field
-func FindMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page int, size int) ([]*Message, error) {
+func FindMsgsWith2Feild(dbcName string, m map[string]string, page int, size int) ([]*Message, error) {
+	if dbcName == "Ocean" {
+		return findMsgsWith2Feild(DBCOceanMessages, m, page, size)
+	} else {
+		return findMsgsWith2Feild(DBCAreaMessages, m, page, size)
+	}
+}
+
+func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page int, size int) ([]*Message, error) {
 	logger.Debug("m:", m, "  size:", size)
 	var msgs []*Message
 	if err := collection.Pipe([]bson.M{
