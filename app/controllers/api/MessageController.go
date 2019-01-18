@@ -84,19 +84,14 @@ func GetMessages(c echo.Context) error {
 		if len(areaid) != 0 {
 			c.Logger().Debug("areaid:", areaid)
 			msg.AreaID = areaid
-		}
-		userid := c.QueryParam("userid")
-		if len(userid) != 0 {
-			c.Logger().Debug("userid:", userid)
-			msg.UserID = userid
 		} else {
-			//user := c.Get("user").(*jwt.Token)
-			//if user != nil {
-			//claims := user.Claims.(jwt.MapClaims)
-			//c.Logger().Debug("msg.UserID :", claims["name"])
-			//msg.UserID = claims["name"].(string)
-			//}
-		}
+         user := c.Get("user").(*jwt.Token)
+         if user != nil {
+            claims := user.Claims.(jwt.MapClaims)
+            c.Logger().Debug("msg.UserID :", claims["name"])
+            msg.UserID = claims["name"].(string)
+         }
+      }
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {
 			sizeLimit = Config.ApiConfig.RandomItemLimit
