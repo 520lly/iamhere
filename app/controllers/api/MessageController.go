@@ -55,8 +55,6 @@ func GetMessages(c echo.Context) error {
 	var sizeLimit = Config.ApiConfig.RandomItemLimit
 	var page = 0
 	var err error
-	//if err := DecodeBody(c, &msg); err != nil {
-	//not Response immediately and check using URL Query
 	debug := c.QueryParam("debug")
 	c.Logger().Debug("debug:", debug)
 	if len(debug) != 0 {
@@ -84,21 +82,20 @@ func GetMessages(c echo.Context) error {
 		if len(areaid) != 0 {
 			c.Logger().Debug("areaid:", areaid)
 			msg.AreaID = areaid
-		} else {
-         user := c.Get("user").(*jwt.Token)
-         if user != nil {
-            claims := user.Claims.(jwt.MapClaims)
-            c.Logger().Debug("msg.UserID :", claims["name"])
-            msg.UserID = claims["name"].(string)
-         }
-      }
+		}
+		user := c.Get("user").(*jwt.Token)
+		if user != nil {
+			claims := user.Claims.(jwt.MapClaims)
+			c.Logger().Debug("msg.UserID :", claims["name"])
+			msg.UserID = claims["name"].(string)
+		}
+
 		sizeLimit, _ = strconv.Atoi(c.QueryParam("size"))
 		if !CheckSizeLimitValidate(sizeLimit) {
 			sizeLimit = Config.ApiConfig.RandomItemLimit
 		}
 		page, _ = strconv.Atoi(c.QueryParam("page"))
 	}
-	//}
 	id := c.Param("id")
 	if CheckStringNotEmpty(id) {
 		msg.ID = StringToBson(id)

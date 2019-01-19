@@ -201,8 +201,8 @@ func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, 
 		},
 		bson.M{
 			"$match": bson.M{
-				"available":   false,
 				"limitaccess": false,
+				//"available":   false,
 			},
 		},
 		bson.M{
@@ -238,9 +238,9 @@ func findMsgsWith1Feild(collection *mgo.Collection, key string, value string, pa
 	if err := collection.Pipe([]bson.M{
 		bson.M{
 			"$match": bson.M{
-				key: value,
-				//"available":   false,
-				//"limitaccess": false,
+				key:           value,
+				"limitaccess": false,
+				//"available": false,
 			},
 		},
 		bson.M{
@@ -278,7 +278,8 @@ func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page in
 			"$match": bson.M{
 				m["key1"]:   m["value1"],
 				m["key2"]:   m["value2"],
-				"available": true,
+				"available": false,
+				//"limitaccess": false,
 			},
 		},
 		bson.M{

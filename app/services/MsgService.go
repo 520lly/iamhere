@@ -164,35 +164,9 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 				RespondJ(c, RspOK, rsp)
 				return nil
 			}
-		} else if CheckStringNotEmpty(msg.UserID) || CheckStringNotEmpty(msg.AreaID) {
-			var err error
-			if CheckStringNotEmpty(msg.UserID) && CheckStringNotEmpty(msg.AreaID) {
-				m := make(map[string]string)
-				if CheckStringNotEmpty(msg.UserID) {
-					m["key1"] = "userid"
-					m["value1"] = msg.UserID
-				}
-				if CheckStringNotEmpty(msg.AreaID) {
-					m["key2"] = "areaid"
-					m["value2"] = msg.AreaID
-				}
-				if msgs, err = FindMsgsWith2Feild(msg.AreaID, m, page, size); err == nil {
-					c.Logger().Debug("Found msgs size: ", len(msgs))
-					rsp.Data = msgs
-					rsp.Count = len(msgs)
-					RespondJ(c, RspOK, rsp)
-					return nil
-				}
-			} else if CheckStringNotEmpty(msg.UserID) {
-				if msgs, err = FindMsgsWith1Feild(msg.AreaID, "userid", msg.UserID, page, size); err == nil {
-					c.Logger().Debug("Found msgs size: ", len(msgs))
-					rsp.Data = msgs
-					rsp.Count = len(msgs)
-					RespondJ(c, RspOK, rsp)
-					return nil
-				}
-			} else if CheckStringNotEmpty(msg.AreaID) {
-				if msgs, err = FindMsgsWith1Feild(msg.AreaID, "areaid", msg.AreaID, page, size); err == nil {
+		} else if CheckStringNotEmpty(msg.AreaID) {
+			if CheckStringNotEmpty(msg.AreaID) {
+				if msgs, err := FindMsgsWith1Feild(msg.AreaID, "areaid", msg.AreaID, page, size); err == nil {
 					c.Logger().Debug("Found msgs size: ", len(msgs))
 					rsp.Data = msgs
 					rsp.Count = len(msgs)
@@ -200,7 +174,16 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 					return nil
 				}
 			}
+		} else if CheckStringNotEmpty(msg.UserID) {
+			if msgs, err := FindMsgsWith1Feild(msg.AreaID, "userid", msg.UserID, page, size); err == nil {
+				c.Logger().Debug("Found msgs size: ", len(msgs))
+				rsp.Data = msgs
+				rsp.Count = len(msgs)
+				RespondJ(c, RspOK, rsp)
+				return nil
+			}
 		}
+
 		c.Logger().Debug("msg longitude: ", msg.Longitude, " latitude: ", msg.Latitude)
 		if !CheckInRangefloat64(msg.Latitude, LatitudeMinimum, LatitudeMaximum) {
 			return NewError("Latitude is out of range")
