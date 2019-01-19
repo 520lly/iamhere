@@ -222,6 +222,49 @@ func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, 
 	return msgs, nil
 }
 
+func GetUserMessages(uid string, page int, size int) ([]*Message, error) {
+	logger.Debug("userId:[", uid, "], page:[", page, "], size [", size, "]")
+	var msgsAreas []*Message
+	if err := DBCAreaMessages.Pipe([]bson.M{
+		bson.M{
+			"$match": bson.M{
+				"userid": uid,
+			},
+		},
+		bson.M{
+			"$sort": bson.M{"timestamp": 1},
+		},
+	}).All(&msgsAreas); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	logger.Debug("msgsAreas :", len(msgsAreas))
+	var msgsOcean []*Message
+	if err := DBCOceanMessages.Pipe([]bson.M{
+		bson.M{
+			"$match": bson.M{
+				"userid": uid,
+			},
+		},
+		bson.M{
+			"$sort": bson.M{"timestamp": 1},
+		},
+	}).All(&msgsOcean); err != nil {
+		logger.Error("err:", err.Error())
+		return nil, err
+	}
+	logger.Debug("msgsOcean :", len(msgsOcean))
+	msgsTotal := append(msgsAreas, msgsOcean...)
+	logger.Debug("msgsTotal :", len(msgsTotal), "Config.ApiConfig.RandomItemLimit * page: ", Config.ApiConfig.RandomItemLimit*page)
+	if len(msgsTotal) > Config.ApiConfig.RandomItemLimit*page+size {
+		return msgsTotal[Config.ApiConfig.RandomItemLimit*page : Config.ApiConfig.RandomItemLimit*page+size], nil
+	} else if len(msgsTotal) > Config.ApiConfig.RandomItemLimit*page {
+		return msgsTotal[Config.ApiConfig.RandomItemLimit*page : len(msgsTotal)], nil
+	} else {
+		return nil, nil
+	}
+}
+
 //@name FindMsgsWith1Feild
 //@brief Find messages with one specific field
 func FindMsgsWith1Feild(dbcName string, key string, value string, page int, size int) ([]*Message, error) {
@@ -276,10 +319,10 @@ func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page in
 	if err := collection.Pipe([]bson.M{
 		bson.M{
 			"$match": bson.M{
-				m["key1"]:   m["value1"],
-				m["key2"]:   m["value2"],
-				"available": false,
-				//"limitaccess": false,
+				m["key1"]:     m["value1"],
+				m["key2"]:     m["value2"],
+				"limitaccess": false,
+				//"available": false,
 			},
 		},
 		bson.M{

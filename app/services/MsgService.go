@@ -175,7 +175,7 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 				}
 			}
 		} else if CheckStringNotEmpty(msg.UserID) {
-			if msgs, err := FindMsgsWith1Feild(msg.AreaID, "userid", msg.UserID, page, size); err == nil {
+			if msgs, err := GetUserMessages(msg.UserID, page, size); err == nil {
 				c.Logger().Debug("Found msgs size: ", len(msgs))
 				rsp.Data = msgs
 				rsp.Count = len(msgs)
