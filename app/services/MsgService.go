@@ -151,13 +151,13 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
 		//Return a message with specific ID (Message ID comes first than location)
 		if CheckBsonObjNotEmpty(msg.ID) {
 			//var m Message
-			if m := GetOneItem(DBCAreaMessages, msg.ID, Message{}); m != nil {
+			if m := GetOneItemWithID(DBCAreaMessages, msg.ID, Message{}); m != nil {
 				c.Logger().Debug("m:", m)
 				//Found msg in Area collection and return
 				rsp := &Response{RspOK, ReasonSuccess, &m, 1}
 				RespondJ(c, RspOK, rsp)
 			}
-			if m := GetOneItem(DBCOceanMessages, msg.ID, Message{}); m != nil {
+			if m := GetOneItemWithID(DBCOceanMessages, msg.ID, Message{}); m != nil {
 				c.Logger().Debug("m:", msg)
 				//Found msg in Ocean collection and return
 				rsp := &Response{RspOK, ReasonSuccess, &m, 1}

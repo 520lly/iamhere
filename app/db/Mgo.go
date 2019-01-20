@@ -465,6 +465,24 @@ func Update(collection *mgo.Collection, query interface{}, i interface{}) bool {
 	return true
 }
 
+func PushNewCarePoint(collection *mgo.Collection, id bson.ObjectId, value interface{}) bool {
+	logger.Debug("value: ", value)
+	if err := collection.UpdateId(id, bson.M{"$push": bson.M{"carepoints": bson.M{"$each": value}}}); err != nil {
+		logger.Error("UpdateById Err:", err.Error())
+		return false
+	}
+	return true
+}
+
+func PullNewCarePoint(collection *mgo.Collection, id bson.ObjectId, value interface{}) bool {
+	logger.Debug("value: ", value)
+	if err := collection.UpdateId(id, bson.M{"$pull": bson.M{"carepoints": value.([]GeoJson)[0]}}); err != nil {
+		logger.Error("UpdateById Err:", err.Error())
+		return false
+	}
+	return true
+}
+
 //func Upsert(collection *mgo.Collection, query interface{}, i interface{}) bool {
 //    _, err := collection.Upsert(query, i)
 //    return Err(err)
@@ -544,7 +562,7 @@ func Get(collection *mgo.Collection, id bson.ObjectId, i interface{}) error {
 	return NewError("nil")
 }
 
-func GetOneItem(collection *mgo.Collection, id bson.ObjectId, i interface{}) interface{} {
+func GetOneItemWithID(collection *mgo.Collection, id bson.ObjectId, i interface{}) interface{} {
 	var ret interface{}
 	switch i.(type) {
 	case Message:

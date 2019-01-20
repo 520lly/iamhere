@@ -102,17 +102,17 @@ func HandleDeleteUsers(c echo.Context, user *User) error {
 	return nil
 }
 
-func HandleUpdateUser(c echo.Context, user *User) error {
+func HandleUpdateUser(c echo.Context, user *User, method string) error {
 	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	changed := false
 	if len(BsonToString(user.ID)) != 0 {
 		var userStored User
-		if err := Get(DBCAccounts, user.ID, &userStored); err != nil {
+		if userStored := GetOneItemWithID(DBCAccounts, user.ID, Message{}); userStored == nil {
 			c.Logger().Debug("Failed to find user with user ID:", user.ID)
 			rsp.Code = RspBadRequest
-			rsp.Reason = err.Error()
+			rsp.Reason = "Not found"
 			RespondJ(c, RspBadRequest, rsp)
-			return err
+			return NewError("Not found")
 		}
 		if len(user.NickName) != 0 && user.NickName != userStored.NickName {
 			if !UpdateByIdField(DBCAccounts, user.ID, "nickname", user.NickName) {
@@ -123,7 +123,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.FirstName) != 0 && user.FirstName != userStored.FirstName {
+		}
+		if len(user.FirstName) != 0 && user.FirstName != userStored.FirstName {
 			if !UpdateByIdField(DBCAccounts, user.ID, "firstname", user.FirstName) {
 				//update firstname failed
 				rsp.Code = RspBadRequest
@@ -132,7 +133,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.LastName) != 0 && user.LastName != userStored.LastName {
+		}
+		if len(user.LastName) != 0 && user.LastName != userStored.LastName {
 			if !UpdateByIdField(DBCAccounts, user.ID, "lastname", user.LastName) {
 				//update lastname failed
 				rsp.Code = RspBadRequest
@@ -141,7 +143,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.Password) != 0 && user.Password != userStored.Password {
+		}
+		if len(user.Password) != 0 && user.Password != userStored.Password {
 			if !UpdateByIdField(DBCAccounts, user.ID, "password", user.Password) {
 				//update password failed
 				rsp.Code = RspBadRequest
@@ -150,7 +153,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.Birthday) != 0 && user.Birthday != userStored.Birthday {
+		}
+		if len(user.Birthday) != 0 && user.Birthday != userStored.Birthday {
 			if !UpdateByIdField(DBCAccounts, user.ID, "birthday", user.Birthday) {
 				//update birthday failed
 				rsp.Code = RspBadRequest
@@ -159,7 +163,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.Gender) != 0 && user.Gender != userStored.Gender {
+		}
+		if len(user.Gender) != 0 && user.Gender != userStored.Gender {
 			if !UpdateByIdField(DBCAccounts, user.ID, "gender", user.Gender) {
 				//update gender failed
 				rsp.Code = RspBadRequest
@@ -168,7 +173,8 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
-		} else if len(user.Comments) != 0 && user.Comments != userStored.Comments {
+		}
+		if len(user.Comments) != 0 && user.Comments != userStored.Comments {
 			if !UpdateByIdField(DBCAccounts, user.ID, "comments", user.Comments) {
 				//update comments failed
 				rsp.Code = RspBadRequest
@@ -177,6 +183,26 @@ func HandleUpdateUser(c echo.Context, user *User) error {
 				return NewError(ReasonOperationFailed)
 			}
 			changed = true
+		}
+		if user.CarePoints != nil {
+			c.Logger().Debug("method: ", method, ",  CarePoints: ", user.CarePoints, " len: ", len(user.CarePoints))
+			if method == "push" {
+				if !PushNewCarePoint(DBCAccounts, user.ID, user.CarePoints) {
+					rsp.Code = RspBadRequest
+					rsp.Reason = ReasonOperationFailed
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonOperationFailed)
+				}
+				changed = true
+			} else if method == "pull" {
+				if !PullNewCarePoint(DBCAccounts, user.ID, user.CarePoints) {
+					rsp.Code = RspBadRequest
+					rsp.Reason = ReasonOperationFailed
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonOperationFailed)
+				}
+				changed = true
+			}
 		}
 		if changed {
 			RespondJ(c, RspOK, rsp)

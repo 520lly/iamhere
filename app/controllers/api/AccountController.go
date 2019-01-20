@@ -101,7 +101,8 @@ func UpdateAccount(c echo.Context) error {
 			RespondJ(c, RspBadRequest, rsp)
 		}
 		user.ID = StringToBson(p.GetID())
-		if err := HandleUpdateUser(c, &user); err != nil {
+		method := c.QueryParam("method")
+		if err := HandleUpdateUser(c, &user, method); err != nil {
 			return err
 		}
 	} else {

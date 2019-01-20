@@ -17,4 +17,5 @@ type User struct {
 	Gender       string        `json:"gender,omitempty"`
 	Comments     string        `json:"comments,omitempty"`
 	TimeStamp    int64         `json:"timestamp"`
+	CarePoints   []GeoJson     `json:"carepoints"`
 }
