@@ -247,7 +247,7 @@ func HandleGetUsers(c echo.Context, user *User, debug bool) error {
 	return NewError("Not found any")
 }
 
-func LoginValidate(c echo.Context, username, password string) error {
+func LoginValidate(c echo.Context, username, password string) (*User, error) {
 	m := make(map[string]string)
 	m["key1"] = "associatedId"
 	m["value1"] = username
@@ -261,7 +261,33 @@ func LoginValidate(c echo.Context, username, password string) error {
 	if users, err := FindUsersWithPW(DBCAccounts, m); users != nil && err == nil {
 		//found user registered
 		c.Logger().Debug("Found users:", JsonToString(users))
-		return nil
+		//how about users is more than one element
+		return users[0], nil
 	}
-	return NewError(ReasonNotFound)
+	return nil, NewError(ReasonNotFound)
+}
+
+func GetAccountIDViaUserID(c echo.Context, userid string) (*User, error) {
+	m := make(map[string]string)
+	if len(userid) != 0 {
+		m["key1"] = "associatedId"
+		m["value1"] = userid
+	}
+	if len(userid) != 0 {
+		m["key2"] = "phonenumber"
+		m["value2"] = userid
+	}
+	if len(userid) != 0 {
+		m["key3"] = "email"
+		m["value3"] = userid
+	}
+	c.Logger().Debug("map side:", len(m))
+	if usersFound, err := FindUsersWithFeild(DBCAccounts, m); err == nil {
+		if len(usersFound) != 0 {
+			c.Logger().Debug("Found users size: ", len(usersFound))
+			//how about users is more than one element
+			return usersFound[0], err
+		}
+	}
+	return nil, NewError("Not found")
 }

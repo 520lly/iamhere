@@ -95,19 +95,30 @@ func DeleteAccounts(c echo.Context) error {
 func UpdateAccount(c echo.Context) error {
 	p := NewPath(c.Request().URL.Path)
 	var user User
+	method := c.QueryParam("method")
 	if p.HasID() {
 		if err := DecodeBody(c, &user); err != nil {
 			rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
 			RespondJ(c, RspBadRequest, rsp)
 		}
 		user.ID = StringToBson(p.GetID())
-		method := c.QueryParam("method")
 		if err := HandleUpdateUser(c, &user, method); err != nil {
 			return err
 		}
 	} else {
-		rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
-		RespondJ(c, RspBadRequest, rsp)
+		userToken := c.Get("user").(*jwt.Token)
+		if userToken != nil {
+			claims := userToken.Claims.(jwt.MapClaims)
+			c.Logger().Debug("UserID :", claims["name"])
+			if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
+				user.ID = u.ID
+				if err := HandleUpdateUser(c, &user, method); err != nil {
+					return err
+				}
+			} else {
+				return NewError("not found")
+			}
+		}
 	}
 	return nil
 }
@@ -116,6 +127,7 @@ func ValidateAccount(c echo.Context) error {
 	//username could be associatedId/phonenumber/email query from URL.Query
 	validatedPass := true
 	lu := new(LoginUser)
+	user := new(User)
 	if err := c.Bind(lu); err != nil {
 		//not Response immediately and check using URL Query
 		lu.UserId = c.QueryParam("userid")
@@ -157,7 +169,7 @@ func ValidateAccount(c echo.Context) error {
 		} else {
 			//handle expired_in data from Wechat server
 			lu.UserId = woi.OpenId
-			if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
+			if user, err = LoginValidate(c, lu.UserId, lu.Password); err != nil {
 				//Not a registered user
 				user := User{AssociatedId: woi.OpenId, Password: lu.Password}
 				if err := HandleCreateNewUser(c, &user); err != nil {
@@ -173,7 +185,8 @@ func ValidateAccount(c echo.Context) error {
 			}
 		}
 	} else {
-		if err := LoginValidate(c, lu.UserId, lu.Password); err != nil {
+		var err error
+		if user, err = LoginValidate(c, lu.UserId, lu.Password); err != nil {
 			validatedPass = false
 			rsp := &Response{RspBadRequest, ReasonAuthFailed, nil, 0}
 			RespondJ(c, RspBadRequest, rsp)
@@ -199,7 +212,7 @@ func ValidateAccount(c echo.Context) error {
 		}
 		rsp := &Response{RspOK, ReasonSuccess, map[string]string{
 			"token":  t,
-			"userid": lu.UserId,
+			"userid": BsonToString(user.ID),
 		}, 0}
 		RespondJ(c, RspOK, rsp)
 		return nil
