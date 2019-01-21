@@ -21,7 +21,8 @@ func HandleCreateNewUser(c echo.Context, user *User) error {
 			rsp.Code = RspBadRequest
 			rsp.Reason = ReasonAlreadyExist
 			RespondJ(c, RspBadRequest, rsp)
-			return NewError(ReasonAlreadyExist)
+			//return NewError(ReasonAlreadyExist)
+			return nil
 		}
 
 		//it'a new user

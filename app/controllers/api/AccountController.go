@@ -9,15 +9,44 @@ import (
 	. "github.com/520lly/iamhere/app/services"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func HandleAccounts(e *echo.Echo) {
 	urlGroup := Config.ApiConfig.Prefix + Config.ApiConfig.Version + Config.ApiConfig.Accounts.Group
 	g := e.Group(urlGroup)
-	g.POST("/register", CreateNewAccount)
-	g.PUT("/:id", UpdateAccount)
-	g.POST("/login", ValidateAccount)
-	g.GET("/login", ValidateAccount)
+	JWTConfigCustomer := middleware.JWTConfig{
+		Skipper: func(c echo.Context) bool {
+			p := NewPath(c.Request().URL.Path)
+			c.Logger().Debug("p.GetID: ", p.GetID())
+			if p.GetID() == "register" {
+				if err := CreateNewAccount(c); err != nil {
+					return false
+				}
+			} else if p.GetID() == "login" {
+				if err := ValidateAccount(c); err != nil {
+					return false
+				}
+			} else if p.GetID() == "update" {
+				if err := UpdateAccount(c); err != nil {
+					return false
+				}
+			}
+			return true
+		},
+		SigningKey:    GetJWTSecretCode(),
+		SigningMethod: middleware.AlgorithmHS256,
+		ContextKey:    "user",
+		TokenLookup:   "header:" + echo.HeaderAuthorization,
+		AuthScheme:    "Bearer",
+		Claims:        jwt.MapClaims{},
+	}
+	//g.Use(middleware.JWT(GetJWTSecretCode()))
+	g.Use(middleware.JWTWithConfig(JWTConfigCustomer))
+	//g.POST("/register", CreateNewAccount)
+	//g.POST("/login", ValidateAccount)
+	//g.GET("/login", ValidateAccount)
+	g.PUT("/update", UpdateAccount)
 	g.GET("/:id", GetAccounts)
 	g.GET("", GetAccounts)
 	g.DELETE("/:id", DeleteAccounts)
@@ -26,18 +55,11 @@ func HandleAccounts(e *echo.Echo) {
 // Handlers
 func CreateNewAccount(c echo.Context) error {
 	var user User
-	rsp := &Response{RspOK, ReasonSuccess, nil, 0}
 	if err := DecodeBody(c, &user); err != nil {
-		rsp.Code = RspBadRequest
-		rsp.Reason = err.Error()
-		RespondJ(c, RspBadRequest, rsp)
 		return err
 	}
 	c.Logger().Debug(JsonToString(user))
 	if err := HandleCreateNewUser(c, &user); err != nil {
-		//rsp.Code = RspBadRequest
-		//rsp.Reason = err.Error()
-		//RespondJ(c, RspBadRequest, rsp)
 		return err
 	}
 	return nil
@@ -93,32 +115,43 @@ func DeleteAccounts(c echo.Context) error {
 
 //Handler for updating user
 func UpdateAccount(c echo.Context) error {
-	p := NewPath(c.Request().URL.Path)
 	var user User
-	method := c.QueryParam("method")
-	if p.HasID() {
-		if err := DecodeBody(c, &user); err != nil {
-			rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
-			RespondJ(c, RspBadRequest, rsp)
-		}
-		user.ID = StringToBson(p.GetID())
-		if err := HandleUpdateUser(c, &user, method); err != nil {
-			return err
-		}
-	} else {
-		userToken := c.Get("user").(*jwt.Token)
-		if userToken != nil {
-			claims := userToken.Claims.(jwt.MapClaims)
-			c.Logger().Debug("UserID :", claims["name"])
-			if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
-				user.ID = u.ID
-				if err := HandleUpdateUser(c, &user, method); err != nil {
-					return err
+	if err := DecodeBody(c, &user); err == nil {
+		c.Logger().Debug("user: ", user)
+		method := c.QueryParam("method")
+		id := c.Param("id")
+		if CheckStringNotEmpty(id) {
+			user.ID = StringToBson(id)
+			if err := HandleUpdateUser(c, &user, method); err != nil {
+				return err
+			}
+		} else {
+			if c.Get("user") != nil {
+				userToken := c.Get("user").(*jwt.Token)
+				c.Logger().Debug("userToken: ", userToken)
+				if userToken != nil {
+					claims := userToken.Claims.(jwt.MapClaims)
+					c.Logger().Debug("UserID :", claims["name"])
+					if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
+						c.Logger().Debug("user found: ", u)
+						user.ID = u.ID
+						c.Logger().Debug("ID: ", user.ID)
+						if err := HandleUpdateUser(c, &user, method); err != nil {
+							return err
+						}
+					} else {
+						return NewError("not found")
+					}
 				}
 			} else {
-				return NewError("not found")
+				rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
+				RespondJ(c, RspBadRequest, rsp)
 			}
 		}
+	} else {
+		c.Logger().Debug("err: ", err.Error())
+		rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
+		RespondJ(c, RspBadRequest, rsp)
 	}
 	return nil
 }
