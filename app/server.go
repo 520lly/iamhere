@@ -69,6 +69,7 @@ func main() {
 	controllers.HandleMessages(api)
 	controllers.HandleAreas(api)
 	controllers.HandleAccounts(api)
+	controllers.HandleLogin(api)
 	controllers.HandleTrail(api)
 
 	//-----
@@ -83,12 +84,13 @@ func main() {
 	controllers.HandleMessages(e)
 	controllers.HandleAreas(e)
 	controllers.HandleAccounts(e)
+	controllers.HandleLogin(e)
 	controllers.HandleTrail(e)
 
 	api.Logger.Debug("enableSSL ", Config.AppConfig.EnableSSL)
 	if Config.AppConfig.EnableSSL {
-		//go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
-		go e.StartAutoTLS(":443")
+		go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
+		//go e.StartAutoTLS(":443")
 	}
 
 	// Start server

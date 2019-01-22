@@ -27,6 +27,10 @@ type Configuration struct {
 			Group string
 		}
 
+		Login struct {
+			Group string
+		}
+
 		Messages struct {
 			Group string
 		}
