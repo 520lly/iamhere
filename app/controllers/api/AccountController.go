@@ -28,13 +28,27 @@ func GetAccounts(c echo.Context) error {
 		debug := c.QueryParam("debug")
 		c.Logger().Debug("debug:", debug)
 		if len(debug) == 0 {
-			p := NewPath(c.Request().URL.Path)
-			if p.HasID() {
-				user.ID = StringToBson(p.GetID())
+			id := c.Param("id")
+			if CheckStringNotEmpty(id) {
+				c.Logger().Debug("id: ", id)
+				user.ID = StringToBson(id)
 			} else {
-				rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
-				RespondJ(c, RspBadRequest, rsp)
-				return NewError(ReasonMissingParam)
+				if userToken := c.Get("user").(*jwt.Token); userToken != nil {
+					c.Logger().Debug("userToken: ", userToken)
+					claims := userToken.Claims.(jwt.MapClaims)
+					c.Logger().Debug("UserID :", claims["name"])
+					if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
+						c.Logger().Debug("user found: ", u)
+						user.ID = u.ID
+						c.Logger().Debug("ID: ", user.ID)
+					} else {
+						return NewError("not found")
+					}
+				} else {
+					rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
+					RespondJ(c, RspBadRequest, rsp)
+					return NewError(ReasonMissingParam)
+				}
 			}
 			c.Logger().Debug(JsonToString(user))
 		} else {
@@ -84,19 +98,17 @@ func UpdateAccount(c echo.Context) error {
 			c.Logger().Debug("id: ", id)
 			//:= c.Get("user").(*jwt.Token)
 			c.Logger().Debug("userToken: ", userToken)
-			if userToken != nil {
-				claims := userToken.Claims.(jwt.MapClaims)
-				c.Logger().Debug("UserID :", claims["name"])
-				if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
-					c.Logger().Debug("user found: ", u)
-					user.ID = u.ID
-					c.Logger().Debug("ID: ", user.ID)
-					if err := HandleUpdateUser(c, &user, method); err != nil {
-						return err
-					}
-				} else {
-					return NewError("not found")
+			claims := userToken.Claims.(jwt.MapClaims)
+			c.Logger().Debug("UserID :", claims["name"])
+			if u, err := GetAccountIDViaUserID(c, claims["name"].(string)); err == nil {
+				c.Logger().Debug("user found: ", u)
+				user.ID = u.ID
+				c.Logger().Debug("ID: ", user.ID)
+				if err := HandleUpdateUser(c, &user, method); err != nil {
+					return err
 				}
+			} else {
+				return NewError("not found")
 			}
 		} else {
 			rsp := &Response{RspBadRequest, ReasonMissingParam, nil, 0}
