@@ -88,9 +88,9 @@ func main() {
 	if Config.AppConfig.EnableSSL {
 		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
 		//Cache certificates
-		e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
-		go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
-		//go e.StartAutoTLS(":443")
+		e.AutoTLSManager.Cache = autocert.DirCache("/etc/letsencrypt/live/www.historystest.com")
+		//go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
+		go e.StartAutoTLS(":443")
 	}
 
 	// Start server
