@@ -19,6 +19,8 @@ apiconfig:
    bodySizeLimit:  "1K"
    accounts:
        group:      "/accounts"
+   login:
+       group:      "/login"
    messages:
        group:      "/messages"
    areas:

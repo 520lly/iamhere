@@ -108,7 +108,7 @@ func HandleUpdateUser(c echo.Context, user *User, method string) error {
 	changed := false
 	if len(BsonToString(user.ID)) != 0 {
 		var userStored User
-		if userStored := GetOneItemWithID(DBCAccounts, user.ID, Message{}); userStored == nil {
+		if userStored := GetOneItemWithID(DBCAccounts, user.ID, User{}); userStored == nil {
 			c.Logger().Debug("Failed to find user with user ID:", user.ID)
 			rsp.Code = RspBadRequest
 			rsp.Reason = "Not found"

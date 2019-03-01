@@ -69,6 +69,7 @@ func main() {
 	controllers.HandleMessages(api)
 	controllers.HandleAreas(api)
 	controllers.HandleAccounts(api)
+	controllers.HandleLogin(api)
 	controllers.HandleTrail(api)
 
 	//-----
@@ -77,16 +78,17 @@ func main() {
 	//TBD
 
 	e := echo.New()
-	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
-	//Cache certificates
-	e.AutoTLSManager.Cache = autocert.DirCache("/var/www/.cache")
 	controllers.HandleMessages(e)
 	controllers.HandleAreas(e)
 	controllers.HandleAccounts(e)
+	controllers.HandleLogin(e)
 	controllers.HandleTrail(e)
 
 	api.Logger.Debug("enableSSL ", Config.AppConfig.EnableSSL)
 	if Config.AppConfig.EnableSSL {
+		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
+		//Cache certificates
+		e.AutoTLSManager.Cache = autocert.DirCache("/etc/letsencrypt/live/www.historystest.com")
 		//go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
 		go e.StartAutoTLS(":443")
 	}
