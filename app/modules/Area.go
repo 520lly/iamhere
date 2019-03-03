@@ -10,7 +10,7 @@ type Area struct {
 	Province    string        `json:"province" bson:"province" valid:"alphanum,printableascii"`
 	City        string        `json:"city" bson:"city" valid:"alphanum,printableascii"`
 	District    string        `json:"district" bson:"district" valid:"alphanum,printableascii"`
-	Discription string        `json:"discription" valid:"alphanum,printableascii"`
+	Description string        `json:"description" valid:"alphanum,printableascii"`
 	Address1    string        `json:"address1" valid:"alphanum,printableascii"`
 	Address2    string        `json:"address2" valid:"alphanum,printableascii"`
 	Category    int           `json:"category" valid:"alphanum,printableascii"`
