@@ -35,11 +35,11 @@ func HandleCreateNewArea(c echo.Context, area *Area) error {
 			rsp.Reason = "District is empty"
 			RespondJ(c, RspBadRequest, rsp)
 			return NewError("District is empty")
-		} else if len(area.Discription) == 0 {
+		} else if len(area.Description) == 0 {
 			rsp.Code = RspBadRequest
-			rsp.Reason = "Discription is empty"
+			rsp.Reason = "Description is empty"
 			RespondJ(c, RspBadRequest, rsp)
-			return NewError("Discription is empty")
+			return NewError("Description is empty")
 		} else if len(area.Address1) == 0 {
 			rsp.Code = RspBadRequest
 			rsp.Reason = "Address1 is empty"
@@ -188,9 +188,9 @@ func HandleUpdateArea(c echo.Context, area *Area) error {
 			}
 			changed = true
 		}
-		if len(area.Discription) != 0 && area.Discription != areaStored.Discription {
-			c.Logger().Debug("UpdateByIdField discription: ", area.Discription)
-			if !UpdateByIdField(DBCAreas, area.ID, "discription", area.Discription) {
+		if len(area.Description) != 0 && area.Description != areaStored.Description {
+			c.Logger().Debug("UpdateByIdField discription: ", area.Description)
+			if !UpdateByIdField(DBCAreas, area.ID, "discription", area.Description) {
 				//update discription failed
 				rsp.Code = RspBadRequest
 				rsp.Reason = ReasonOperationFailed
