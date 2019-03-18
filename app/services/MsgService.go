@@ -51,7 +51,7 @@ func HandleCreateNewMessage(c echo.Context, msg *Message) error {
 			//this message belong to a specific area
 			msg.AreaID = BsonToString(area.ID)
 			if Insert(DBCAreaMessages, msg) {
-				c.Logger().Debug("Insert ", msg.AreaID, " DBCAreaMessages Success")
+				c.Logger().Debug("Insert ", area.Name, " DBCAreaMessages Success")
 				if err := CreateGeoIndex(DBCAreaMessages); err == nil {
 					c.Logger().Debug("CreateGeoIndex Success")
 					c.Logger().Debug("Response: ", JsonToString(rsp))

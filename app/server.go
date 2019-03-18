@@ -24,7 +24,7 @@ type (
 
 func main() {
 	//-----
-	// API
+	// HTTP API
 	//-----
 	// Echo instance
 	api := echo.New()
@@ -41,7 +41,7 @@ func main() {
 		// set location of log file
 		now := time.Now()
 		dt := now.Format("2006-01-02-15:04:05")
-		var logpath = Config.AppConfig.LogPath + "[HTTP]" + dt + ".log"
+		var logpath = Config.AppConfig.LogPath + "HTTP-" + dt + ".log"
 		api.Logger.Debug("Dump Log file: ", logpath)
 		f, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
@@ -54,7 +54,6 @@ func main() {
 	api.Logger.Debug("Dialing mongo ", Config.Database.Host)
 	Addr := string(Config.AppConfig.Host) + ":" + string(Config.AppConfig.Port)
 	api.Logger.Debug("Addr ", Addr)
-	db.Init(Config.Database.Host, Config.Database.Name, api.Logger)
 
 	api.Use(middleware.BodyLimit(Config.ApiConfig.BodySizeLimit))
 	api.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -73,9 +72,8 @@ func main() {
 	controllers.HandleTrail(api)
 
 	//-----
-	// WEB
+	// API HTTPS
 	//-----
-	//TBD
 	apiTLS := echo.New()
 	apiTLS.Use(middleware.Logger())
 	apiTLS.Use(middleware.Recover())
@@ -90,7 +88,7 @@ func main() {
 		// set location of log file
 		now := time.Now()
 		dt := now.Format("2006-01-02-15:04:05")
-		var logpath = Config.AppConfig.LogPath + "[HTTPS]" + dt + ".log"
+		var logpath = Config.AppConfig.LogPath + "HTTPS-" + dt + ".log"
 		apiTLS.Logger.Debug("Dump Log file: ", logpath)
 		f, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
@@ -100,6 +98,7 @@ func main() {
 		apiTLS.Logger.SetOutput(f)
 	}
 	apiTLS.Logger.SetPrefix(Config.AppConfig.LoggerPrefix)
+	db.Init(Config.Database.Host, Config.Database.Name, apiTLS.Logger)
 
 	controllers.HandleMessages(apiTLS)
 	controllers.HandleAreas(apiTLS)
@@ -112,7 +111,6 @@ func main() {
 		apiTLS.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
 		//Cache certificates
 		apiTLS.AutoTLSManager.Cache = autocert.DirCache("/etc/letsencrypt/live/www.historystest.com")
-		//go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
 		go apiTLS.StartAutoTLS(":443")
 	}
 
