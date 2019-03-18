@@ -1,0 +1,44 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          iamhere
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/stop
+### END INIT INFO
+
+# Source function library.
+. /lib/lsb/init-functions
+
+retval=0
+pidfile=`ps -ef | grep 'iamhere' | grep -v grep | awk '{print $2}'`
+
+PROGRAM="/home/jaycee/gopath/src/github.com/520lly/iamhere/api/api"
+MONGOPID=`ps -ef | grep 'iamhere' | grep -v grep | awk '{print $2}'`
+
+test -x $PROGRAM || exit 0
+
+case "$1" in
+  start)
+     ulimit -n 3000
+     log_begin_msg "Starting iamhere api server"
+     $PROGRAM &
+     log_end_msg 0
+     ;;
+  stop)
+     log_begin_msg "Stopping iamhere api server"
+     if [ ! -z "$MONGOPID" ]; then
+        kill -15 $MONGOPID
+     fi
+     log_end_msg 0
+     ;;
+  status)
+     ;;
+  *)
+     log_success_msg "Usage: /etc/init.d/iamhere {start|stop|status}"
+     exit 1
+esac
+
+exit 0
+

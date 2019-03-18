@@ -1,0 +1,82 @@
+#!/bin/bash
+# encoding: utf-8
+# Name  : beenhere.sh
+# Descp : used for 
+# Author: jaycee
+# Date  : 17/02/19 10:23:16 +0800
+__version__=0.1
+
+#set -x                     #print every excution log
+set -e                     #exit when error hanppens
+
+
+USER="root"
+HOST="39.98.64.79"
+PASSWD="`cat ~/bin/pws/pw4root | tr -d ['\r\n']`"
+PEM="~/bin/history.pem"
+CMD_PROMPT="\](\$|#)" 
+CLEAR="\0C"
+
+function usage()
+{
+cat << EOF
+usage:$0  [-h?sup] <server -s> <username -u> <password -p>
+-------- server 0 : AliYun(39.98.64.79)
+EOF
+}
+
+while getopts "h?s:u:p:" opt; do
+    case "$opt" in
+        h|\?)
+            usage
+            exit 0
+            ;;
+        s)  
+            SERVER=$OPTARG
+            #drop the first two parameters
+            shift 2
+            ;;
+        u)  
+            USER=$OPTARG
+            #drop the first two parameters
+            shift 2
+            ;;
+        p)  
+            PASSWD=$OPTARG
+            #drop the first two parameters
+            shift 2
+            ;;
+    esac
+done
+
+if [ ${SERVER} == "1" ]
+then
+   echo "Default user"
+elif [ ${SERVER} == "2" ]
+then
+   echo "Not Supported"
+   exit 1
+fi
+
+#echo "HOST = ${HOST}"
+
+expect -c " 
+   spawn ssh -i $PEM $USER@$HOST
+   send_user connecting\ to\ $TARGET_NAME...\r 
+   expect {
+           *yes/no* { send -- yes\r;exp_continue;}  
+           *password* { 
+           send -- $PASSWD\r;
+           set timeout 1
+           expect -re $CMD_PROMPT
+           send -- zsh\r;            #clear screen
+           expect -re $CMD_PROMPT
+           send -- mtmux\r;            #clear screen
+           #send -- $CLEAR\r;            #clear screen
+       }  
+   }
+   #expect -re $CMD_PROMPT
+   #send -- $CLEAR\r;            #clear screen
+   interact
+"  
+
