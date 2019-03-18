@@ -1,0 +1,1125 @@
+{
+	"variables": [],
+	"info": {
+		"name": "iamhere-echo",
+		"_postman_id": "9971d65f-c7a6-4c68-a3bd-563bb87726b8",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": " local",
+			"description": "",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/login?userid=13167016112&password=12345&usertype=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"login"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "13167016112",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "usertype",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": null
+					},
+					"response": []
+				},
+				{
+					"name": "LoginUserLocal",
+					"request": {
+						"url": "",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listAllUserLocal",
+					"request": {
+						"url": "http://localhost:9090/api/v1/accounts",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyODM1NSwibmFtZSI6IjEzMTY3MDE2MTEyIn0.KV4ZllaxJ0AVa6Y7WLHU34TZ3w6FFBTrkJyL0ArBvkY",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": null
+					},
+					"response": []
+				},
+				{
+					"name": "listMsgsLocal",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/messages?size=20&page=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "20",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "2",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU1MzA4NTc2NiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.MH_zFqwn1IyUGwrzp3tJEOHXoGkoIM1ZLO55mIjiHro",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listAreasLocal",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/areas?longitude=0&&latitude=0&&altitude=0&&radius=100&&debug=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"areas"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "latitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "altitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "radius",
+									"value": "100",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createMsgLocal",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/messages?debug=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU1MzA4NTc2NiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.MH_zFqwn1IyUGwrzp3tJEOHXoGkoIM1ZLO55mIjiHro",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"areaid\":\"5b75785381b37308243c79ec\",\"userid\":\"13167016112\",\"content\":\"Hello world!222222\",\"userdefaddr\":\"梅江南苑\",\"expirytime\":123,\"latitude\":29.7039399637,\"longitude\":121.1754884604,\"altitude\":123,\"color\":1,\"available\":false,\"limitaccess\":false}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createAreasLocal",
+					"request": {
+						"url": "http://localhost:9090/api/v1/areas",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU1MzA4NTc2NiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.MH_zFqwn1IyUGwrzp3tJEOHXoGkoIM1ZLO55mIjiHro",
+								"description": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\":\"宁波图书馆\",\"description\":\"字里行间\",\"address1\":\"浙江省宁波市\",\"address2\":\"\",\"category\":16,\"type\":0,\"latitude\":29.86032602,\"longitude\":121.62231429,\"altitude\":0,\"radius\":350.00}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createUpdateUserLocal",
+					"request": {
+						"url": "",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createUpdateUserLocalPart",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/accounts/update?method=push",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"update"
+							],
+							"query": [
+								{
+									"key": "method",
+									"value": "push",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTI3NSwibmFtZSI6IjEzMTY3MDE2MTEyIn0.ngFraD9yzYCmhCcCiUSUNCg5dFzSFjmSm_Wz51LkVWg",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"carepoints\":[{\"type\":\"Point\",\"coordinates\":[111.000,2.000]}]}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listMsgsLocalID",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/messages?areaid=5b75785381b37308243c79ec&&size=20&&page=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "areaid",
+									"value": "5b75785381b37308243c79ec",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODE0MzY1NiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.rloKqiaxztJ3U_c3feX000t0tbbtTXExoguO2h32BT8",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "LoginUserLocal",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/login?userid=13167016112&password=12345&usertype=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"login"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "13167016112",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "usertype",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createUpdateUserLocal",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/accounts/update?method=push",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"update"
+							],
+							"query": [
+								{
+									"key": "method",
+									"value": "push",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTI3NSwibmFtZSI6IjEzMTY3MDE2MTEyIn0.ngFraD9yzYCmhCcCiUSUNCg5dFzSFjmSm_Wz51LkVWg",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"phonenumber\":\"13167016117\",\"email\":\"jacking.wang.wjq1@gmail.com\",\"nickname\":\"dddd\",\"firstname\":\"jianqing\",\"lastname\":\"wang\",\"password\":\"12345\",\"birthday\":\"19990919\",\"gender\":\"male\",\"timestamp\":1536062227,\"carepoints\":[{\"type\":\"Point\",\"coordinates\":[11.000,2.000]}]}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createUser",
+					"request": {
+						"url": "",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "remote_new_base_http",
+			"description": "",
+			"item": [
+				{
+					"name": "listAreas",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/areas?longitude=0&&latitude=0&&altitude=0&&radius=100&&debug=1",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"areas"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "latitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "altitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "radius",
+									"value": "100",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0NTIxNzMyMSwibmFtZSI6Im9kUzdUNU1lUmk4Y1dkVVI1NEpTc2tjR2RHakUifQ.3C1fq7dGSTtYByeg7qwZp3v6Tn46dfIKdZYT9nQeJNY",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listMsgRemote",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/messages?areaid=Ocean",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "areaid",
+									"value": "Ocean",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTUzMiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.QDU-4RcQt9gIpRj2s57SSLav6JSeA64UY2HBujpa9L8",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "LoginRemote",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/accounts/login?userid=13167016112&password=1234&usertype=1&jscode=061UNlC92LILgL0ESMA92boBC92UNlC4",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"login"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "13167016112",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "password",
+									"value": "1234",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "usertype",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "jscode",
+									"value": "061UNlC92LILgL0ESMA92boBC92UNlC4",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listMsgUser",
+					"request": {
+						"url": "http://35.187.154.122:9090/api/v1/accounts",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTUzMiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.QDU-4RcQt9gIpRj2s57SSLav6JSeA64UY2HBujpa9L8",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listMsgRemote",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/messages?areaid=5b757f6455dcfd0bb853c33b&&size=20&&page=0",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "areaid",
+									"value": "5b757f6455dcfd0bb853c33b",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "size",
+									"value": "20",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTUzMiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.QDU-4RcQt9gIpRj2s57SSLav6JSeA64UY2HBujpa9L8",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "listAreaRemote",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/areas?debug=1",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"areas"
+							],
+							"query": [
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createMsgRemote",
+					"request": {
+						"url": "http://35.187.154.122:9090/api/v1/messages",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTUzMiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.QDU-4RcQt9gIpRj2s57SSLav6JSeA64UY2HBujpa9L8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"areaid\":\"5b75785381b37308243c79ec\",\"userid\":\"13167016112\",\"content\":\"Test from Jacking 121112164 ddadaadad611\",\"userdefaddr\":\"梅江南苑\",\"expirytime\":123,\"latitude\":29.7039399637,\"longitude\":121.1754884604,\"altitude\":123,\"color\":2,\"available\":false,\"limitaccess\":false,\"carepoints\":[{\"type\":\"Point\",\"coordinates\":[111.000,2.000]}]}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "createUpdateUserRemote",
+					"request": {
+						"url": {
+							"raw": "http://35.187.154.122:9090/api/v1/accounts/update?method=push",
+							"protocol": "http",
+							"host": [
+								"35",
+								"187",
+								"154",
+								"122"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"accounts",
+								"update"
+							],
+							"query": [
+								{
+									"key": "method",
+									"value": "push",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU0ODQyMTUzMiwibmFtZSI6IjEzMTY3MDE2MTEyIn0.QDU-4RcQt9gIpRj2s57SSLav6JSeA64UY2HBujpa9L8",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"carepoints\":[{\"type\":\"Point\",\"coordinates\":[11.000,2.000]}]}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "loginRemote",
+					"request": {
+						"url": "",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "new_base_remote_https",
+			"description": "",
+			"item": [
+				{
+					"name": "getHistoryMsgs",
+					"request": {
+						"url": {
+							"raw": "https://www.historytest.com/messages?key=abc123&&debug=1",
+							"protocol": "https",
+							"host": [
+								"www",
+								"historytest",
+								"com"
+							],
+							"path": [
+								"messages"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "abc123",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Aliyun",
+			"description": "",
+			"item": [
+				{
+					"name": "Aliyun-ListUser",
+					"request": {
+						"url": "http://39.98.64.79:9090/api/v1/accounts",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Aliyun-https",
+					"request": {
+						"url": "",
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Aliyun-listAreas",
+					"request": {
+						"url": {
+							"raw": "https://www.historystest.com/api/v1/areas?longitude=0&&latitude=0&&altitude=0&&radius=100&&debug=1",
+							"protocol": "https",
+							"host": [
+								"www",
+								"historystest",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"areas"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "latitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "altitude",
+									"value": "0",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "radius",
+									"value": "100",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								},
+								{
+									"key": "",
+									"value": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Aliyun-getOceanMsgAll",
+					"request": {
+						"url": {
+							"raw": "https://www.historystest.com/api/v1/messages?debug=1",
+							"protocol": "https",
+							"host": [
+								"www",
+								"historystest",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6ZmFsc2UsImV4cCI6MTU1MjA1NzAzMywibmFtZSI6IjEzMTY3MDE2MTEyIn0.5zkqbQZCCWuMda328FMiVsjfql0HW4kX7-Co77kXfd0",
+								"description": ""
+							}
+						],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Aliyun-CreateMsg",
+					"request": {
+						"url": {
+							"raw": "http://localhost:9090/api/v1/messages?debug=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9090",
+							"path": [
+								"api",
+								"v1",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "debug",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "POST",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Aliyun-Login",
+					"request": {
+						"url": {
+							"raw": "https://www.historystest.com/api/v1/login?userid=13167016112&password=1234&usertype=1",
+							"protocol": "https",
+							"host": [
+								"www",
+								"historystest",
+								"com"
+							],
+							"path": [
+								"api",
+								"v1",
+								"login"
+							],
+							"query": [
+								{
+									"key": "userid",
+									"value": "13167016112",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "password",
+									"value": "1234",
+									"equals": true,
+									"description": ""
+								},
+								{
+									"key": "usertype",
+									"value": "1",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "GET",
+						"header": [],
+						"body": {},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -41,7 +41,7 @@ func main() {
 		// set location of log file
 		now := time.Now()
 		dt := now.Format("2006-01-02-15:04:05")
-		var logpath = Config.AppConfig.LogPath + dt + ".log"
+		var logpath = Config.AppConfig.LogPath + "[HTTP]" + dt + ".log"
 		api.Logger.Debug("Dump Log file: ", logpath)
 		f, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE, 0666)
 		if err != nil {
@@ -76,21 +76,44 @@ func main() {
 	// WEB
 	//-----
 	//TBD
+	apiTLS := echo.New()
+	apiTLS.Use(middleware.Logger())
+	apiTLS.Use(middleware.Recover())
 
-	e := echo.New()
-	controllers.HandleMessages(e)
-	controllers.HandleAreas(e)
-	controllers.HandleAccounts(e)
-	controllers.HandleLogin(e)
-	controllers.HandleTrail(e)
+	//load customized config
+	InitConfig(apiTLS.Logger)
+	if Config.AppConfig.EnableDebug {
+		apiTLS.Logger.SetLevel(log.DEBUG)
+	}
+	apiTLS.Logger.SetPrefix(Config.AppConfig.LoggerPrefix)
+	if Config.AppConfig.EnableDumpLog {
+		// set location of log file
+		now := time.Now()
+		dt := now.Format("2006-01-02-15:04:05")
+		var logpath = Config.AppConfig.LogPath + "[HTTPS]" + dt + ".log"
+		apiTLS.Logger.Debug("Dump Log file: ", logpath)
+		f, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE, 0666)
+		if err != nil {
+			apiTLS.Logger.Fatal("error opening file: ", err)
+		}
+		defer f.Close()
+		apiTLS.Logger.SetOutput(f)
+	}
+	apiTLS.Logger.SetPrefix(Config.AppConfig.LoggerPrefix)
 
-	api.Logger.Debug("enableSSL ", Config.AppConfig.EnableSSL)
+	controllers.HandleMessages(apiTLS)
+	controllers.HandleAreas(apiTLS)
+	controllers.HandleAccounts(apiTLS)
+	controllers.HandleLogin(apiTLS)
+	controllers.HandleTrail(apiTLS)
+
+	apiTLS.Logger.Debug("enableSSL ", Config.AppConfig.EnableSSL)
 	if Config.AppConfig.EnableSSL {
-		e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
+		apiTLS.AutoTLSManager.HostPolicy = autocert.HostWhitelist("www.historystest.com")
 		//Cache certificates
-		e.AutoTLSManager.Cache = autocert.DirCache("/etc/letsencrypt/live/www.historystest.com")
+		apiTLS.AutoTLSManager.Cache = autocert.DirCache("/etc/letsencrypt/live/www.historystest.com")
 		//go e.StartTLS(":443", "/etc/ssl/214987401110045.pem", "/etc/ssl/214987401110045.key")
-		go e.StartAutoTLS(":443")
+		go apiTLS.StartAutoTLS(":443")
 	}
 
 	// Start server
