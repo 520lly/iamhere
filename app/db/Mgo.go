@@ -179,13 +179,13 @@ func FindMsgWithID(id bson.ObjectId) (*Message, error) {
 //@brief Find messages with one specific geo location
 func FindMsgsWithGeoLocation(dbcName string, geo GeoJson, page int, size int) ([]*Message, error) {
 	if dbcName == "Ocean" {
-		return findMsgsWithGeoLocation(DBCOceanMessages, geo, page, size)
+		return findMsgsWithGeoLocation(DBCOceanMessages, geo, page, size, Config.ApiConfig.MixAcessDistanceLimit, false)
 	} else {
-		return findMsgsWithGeoLocation(DBCAreaMessages, geo, page, size)
+		return findMsgsWithGeoLocation(DBCAreaMessages, geo, page, size, Config.ApiConfig.MixAcessDistanceLimit, false)
 	}
 }
 
-func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, size int) ([]*Message, error) {
+func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, size int, distance int, limit bool) ([]*Message, error) {
 	var msgs []*Message
 	if err := collection.Pipe([]bson.M{
 		bson.M{
@@ -195,14 +195,13 @@ func findMsgsWithGeoLocation(collection *mgo.Collection, geo GeoJson, page int, 
 						"Type":        "Point",
 						"coordinates": []float64{geo.Coordinates[0], geo.Coordinates[1]},
 					},
-					"$maxDistance": Config.ApiConfig.MixAcessDistanceLimit,
+					"$maxDistance": distance,
 				},
 			},
 		},
 		bson.M{
 			"$match": bson.M{
-				"limitaccess": false,
-				//"available":   false,
+				"limitaccess": limit,
 			},
 		},
 		bson.M{
@@ -305,11 +304,11 @@ func findMsgsWith1Feild(collection *mgo.Collection, key string, value string, pa
 
 //@name FindMsgsWith2Feild
 //@brief Find messages with 2 specific field
-func FindMsgsWith2Feild(dbcName string, m map[string]string, page int, size int) ([]*Message, error) {
+func FindMsgsWith2Feild(dbcName string, conditions map[string]string, page int, size int) ([]*Message, error) {
 	if dbcName == "Ocean" {
-		return findMsgsWith2Feild(DBCOceanMessages, m, page, size)
+		return findMsgsWith2Feild(DBCOceanMessages, conditions, page, size)
 	} else {
-		return findMsgsWith2Feild(DBCAreaMessages, m, page, size)
+		return findMsgsWith2Feild(DBCAreaMessages, conditions, page, size)
 	}
 }
 
@@ -322,7 +321,6 @@ func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page in
 				m["key1"]:     m["value1"],
 				m["key2"]:     m["value2"],
 				"limitaccess": false,
-				//"available": false,
 			},
 		},
 		bson.M{
@@ -416,6 +414,7 @@ func GetRandomMessages(collection *mgo.Collection, num int) []*Message {
 			return nil
 		}
 	} else {
+      //Randomly selects the specified number of documents from the its input
 		if err := collection.Pipe([]bson.M{{"$sample": bson.M{"size": num}}}).All(&msgs); err != nil {
 			return nil
 		}
