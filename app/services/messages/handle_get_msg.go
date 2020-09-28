@@ -19,9 +19,8 @@ const (
    ChoiceMsgIDSelected int32 = 2
    ChoiceAreaIDSelected int32 = 3
    ChoiceUserIDSelected int32 = 4
-   ChoiceGeoValidShife int32 = 5
+   ChoiceGeoValidShifed int32 = 5
 )
-
 
 func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size int) error {
    c.Logger().Debug("msg:", msg, "  debug:", debug, "  size:", size, "  page:", page)
@@ -65,12 +64,10 @@ func HandleGetMessages(c echo.Context, msg *Message, debug bool, page int, size 
       retErr = getItemsWithUserAndAreaID(page, size, msg, msgs)
    case ChoiceAreaIDSelected:
       retErr = getItemsWithAreaID(page, size, msg,msgs)
-   case ChoiceMsgIDSelected:
-      retErr = getItemWithMsgID(msg,msgs)
-   case ChoiceMsgIDSelected:
-      retErr = getItemWithMsgID(msg,msgs)
-   case ChoiceMsgIDSelected:
-      retErr = getItemWithMsgID(msg,msgs)
+   case ChoiceGeoValidShifed:
+      retErr = getItemWithGeo(page, size, msg, msgs)
+   case ChoiceGeoValidShifed + ChoiceAreaIDSelected:
+      retErr = getItemWithGeoAndAreaID(page, size, msg,msgs)
    }
    //getRandomItems(c, size, msgs)
    //Return a message with specific ID (Message ID comes first than location)
@@ -186,9 +183,8 @@ func getItemsWithUserAndAreaID(page int, size int, msg *Message, msgs []*Message
    m["value2"] = msg.AreaID
    m["key3"] = "limitaccess"
    m["value3"] = false
-   if msgs, err = FindMsgsWith2Feild(msg.AreaID, "areaid", msg.AreaID, page, size); err != nil {
-   if msgs, err = FindMsgsWith2Feild(msg.AreaID, "areaid", msg.AreaID, page, size); err != nil {
-      err = NewError("Operation failed: Failed to get msgs with specified user ID from area/ocean msgs list!")
+   if msgs, err = FindMsgsWith3Feild(msg.AreaID, m, page, size); err != nil {
+      err = NewError("Operation failed: Failed to get msgs with specified user and area ID from area/ocean msgs list!")
    }
    return err
 }
@@ -201,8 +197,6 @@ func getItemsWithAreaID(page int, size int, msg *Message, msgs []*Message/*Messa
    return err
 }
 
-
-
 func getRandomItems(size int, msgs []*Message /*Messages found and return*/) error {
    msgs = GetRandomMessages(DBCOceanMessages, size)
    if msgs == nil {
@@ -210,4 +204,28 @@ func getRandomItems(size int, msgs []*Message /*Messages found and return*/) err
    } else {
       return nil
    }
+}
+
+func getItemWithGeo(page int, size int, msg *Message, msgs []*Message /*Messages found and return*/) error {
+   err := nil
+   if area := FindAreaWithLocation(c, msg.Longitude, msg.Latitude); area != nil {
+      //this message belong to a specific area
+      msgs = GetSpecifiedLocationMessages(DBCAreaMessages, msg.Longitude, msg.Latitude, area.Radius, Config.ApiConfig.RandomItemLimit)
+      if msgs == nil {
+         err = NewError("Operation failed: Failed to get msgs with specified GEO from DBCAreaMessages list!")
+      }
+   } else {
+      //Found up to random item limit ocean messages
+      msgs = GetSpecifiedLocationMessages(DBCOceanMessages, msg.Longitude, msg.Latitude, area.Radius, Config.ApiConfig.RandomItemLimit)
+      if msgs == nil {
+         err = NewError("Operation failed: Failed to get msgs with specified GEO from DBCOceanMessages list!")
+      }
+   }
+   return err
+}
+
+func getItemWithGeoAndAreaID(page, size, msg,msgs) error {
+   err := nil
+
+   return err
 }

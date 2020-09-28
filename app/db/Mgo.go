@@ -71,22 +71,11 @@ func Init(url, dbname string, log echo.Logger) {
 
 }
 
-func CreateNewObjectId() bson.ObjectId {
-	return bson.NewObjectId()
-}
-
-func CreateGeoIndex(collection *mgo.Collection) error {
-	fmt.Println("CreateGeoIndex:")
-	// ensure
-	// Creating the indexes
-	index := mgo.Index{
-		Key: []string{"$2dsphere:location"},
-	}
-	if err := collection.EnsureIndex(index); err != nil {
-		fmt.Println("err:", err)
-		return err
-	}
-	return nil
+func connect(dbName, collection string) (*mgo.Session, *mgo.Collection) {
+   ms := DBSession.Copy()
+   c := ms.DB(dbName).C(collection)
+   ms.SetMode(mgo.Monotonic, true)
+   return ms, c
 }
 
 func DeleteMessageWithID(id bson.ObjectId) error {
@@ -282,7 +271,6 @@ func findMsgsWith1Feild(collection *mgo.Collection, key string, value string, pa
 			"$match": bson.M{
 				key:           value,
 				"limitaccess": false,
-				//"available": false,
 			},
 		},
 		bson.M{
@@ -302,17 +290,17 @@ func findMsgsWith1Feild(collection *mgo.Collection, key string, value string, pa
 	return msgs, nil
 }
 
-//@name FindMsgsWith2Feild
-//@brief Find messages with 2 specific field
-func FindMsgsWith2Feild(dbcName string, conditions map[string]string, page int, size int) ([]*Message, error) {
+//@name FindMsgsWith3Feild
+//@brief Find messages with 3 specific field
+func FindMsgsWith3Feild(dbcName string, conditions map[string]string, page int, size int) ([]*Message, error) {
 	if dbcName == "Ocean" {
-		return findMsgsWith2Feild(DBCOceanMessages, conditions, page, size)
+		return findMsgsWith3Feild(DBCOceanMessages, conditions, page, size)
 	} else {
-		return findMsgsWith2Feild(DBCAreaMessages, conditions, page, size)
+		return findMsgsWith3Feild(DBCAreaMessages, conditions, page, size)
 	}
 }
 
-func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page int, size int) ([]*Message, error) {
+func findMsgsWith3Feild(collection *mgo.Collection, m map[string]string, page int, size int) ([]*Message, error) {
 	logger.Debug("m:", m, "  size:", size)
 	var msgs []*Message
 	if err := collection.Pipe([]bson.M{
@@ -320,7 +308,7 @@ func findMsgsWith2Feild(collection *mgo.Collection, m map[string]string, page in
 			"$match": bson.M{
 				m["key1"]:     m["value1"],
 				m["key2"]:     m["value2"],
-				"limitaccess": false,
+				m["key3"]:     m["value3"],
 			},
 		},
 		bson.M{
@@ -424,25 +412,43 @@ func GetRandomMessages(collection *mgo.Collection, num int) []*Message {
 }
 
 func GetSpecifiedLocationMessages(collection *mgo.Collection, lon float64, lat float64, rad float64, num int) []*Message {
-	var msgs []*Message
-	if CheckInRangefloat64(lon, LongitudeMinimum, LongitudeMaximum) && CheckInRangefloat64(lat, LatitudeMinimum, LatitudeMaximum) && CheckInRangefloat64(rad, RadiusMinimum, RadiusMaximum) {
-		if err := DBCAreaMessages.Find(bson.M{
-			"location": bson.M{
-				"$nearSphere": bson.M{
-					"$geometry": bson.M{
-						"Type":        "Point",
-						"coordinates": []float64{lon, lat},
-					},
-					"$maxDistance": rad,
-				},
-			},
-		}).Limit(num).All(&msgs); err != nil {
-			return nil
-		}
-	} else {
-		return nil
-	}
-	return msgs
+   var msgs []*Message
+   if err := DBCAreaMessages.Find(bson.M{
+      "location": bson.M{
+         "$nearSphere": bson.M{
+            "$geometry": bson.M{
+               "Type":        "Point",
+               "coordinates": []float64{lon, lat},
+            },
+            "$maxDistance": rad,
+         },
+      },
+   }).Limit(num).All(&msgs); err != nil {
+      return nil
+   }
+   return msgs
+}
+
+func createGeoFilter(lon float64, lat float64, rad float64) bson.M {
+   var filter bson.M
+   filter = bson.M{
+      "location": bson.M{
+         "$nearSphere": bson.M{
+            "$geometry": bson.M{
+               "Type":        "Point",
+               "coordinates": []float64{lon, lat},
+            },
+            "$maxDistance": rad,
+         },
+      },
+   }
+   return filter
+}
+
+func appendFilters(f1 bson.M, f2 bson.M) []bson.M {
+   var filters []bson.M
+   filters = append(f1, f2...)
+   return filters
 }
 
 func Insert(collection *mgo.Collection, i interface{}) bool {
